@@ -35,26 +35,13 @@
 (require 'mozc)
 (setq default-input-method "japanese-mozc")
 
-; 
-(setq mozc-candidate-style 'overlay)
-
-; 
+; 変換候補を表示する位置
+; 入力中のすぐ下に表示はelscreenと相性が悪く、縦に並んでいたのが横に並んでしまい見にくい 
+; (setq mozc-candidate-style 'overlay)
+; 候補をエコーエリアに表示する
+(setq mozc-candidate-style 'echo-area)
+; C-oでmozcの有効、無効を切り替える
 (global-set-key (kbd "C-o") 'toggle-input-method)
-
-(setq mozc-color "blue")
-
-(defun mozc-change-cursor-color ()
-  (if mozc-mode
-      (set-buffer-local-cursor-color mozc-color)
-    (set-buffer-local-cursor-color nil)))
-
-(add-hook 'input-method-activate-hook
-          (lambda () (mozc-change-cursor-color)))
-
-(if (featurep 'key-chord)
-    (defadvice toggle-input-method (after my-toggle-input-method activate)
-      (mozc-change-cursor-color)))
-
 
 ;------------------------------------------------------------------------------
 ; バックアップファイルを作らない
@@ -64,5 +51,9 @@
 ; .#*
 (setq auto-save-default nil)
 
+;------------------------------------------------------------------------------
+; elscreen
+; Emacs内でGnu Screenのような状態を作る
+;------------------------------------------------------------------------------
 (require 'elscreen)
 (elscreen-start)
