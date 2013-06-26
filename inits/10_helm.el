@@ -1,23 +1,23 @@
 (require 'helm-config)
 (helm-mode 1)
 
-; buffer¤ärecentf¤òÉ½¼¨¤¹¤ë
+; bufferã‚„recentfã‚’è¡¨ç¤ºã™ã‚‹
 (global-set-key (kbd "C-c h") 'helm-mini)
-; buffer¤òÀÚ¤êÂØ¤¨¤ë
+; bufferã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
 (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-; ¥Õ¥¡¥¤¥ë¤ÎÍúÎò¤òÉ½¼¨¤¹¤ë
+; ãƒ•ã‚¡ã‚¤ãƒ«ã®å±¥æ­´ã‚’è¡¨ç¤ºã™ã‚‹
 (global-set-key (kbd "C-x C-r") 'helm-recentf)
-; kill-ring¤ò°ìÍ÷É½¼¨¤¹¤ë
+; kill-ringã‚’ä¸€è¦§è¡¨ç¤ºã™ã‚‹
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
-; TAB¤ò²¡¤¹¤È¸½ºß¥«¡¼¥½¥ë¤¬¤¢¤ë¤â¤Î¤Ë¤Ê¤ë
+; TABã‚’æŠ¼ã™ã¨ç¾åœ¨ã‚«ãƒ¼ã‚½ãƒ«ãŒã‚ã‚‹ã‚‚ã®ã«ãªã‚‹
 (define-key helm-c-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
 
-; ¼«Æ°Êä´°¤òÌµ¸ú
-; ¥Ñ¥¹¤¬¾¡¼ê¤ËÊä´°¤µ¤ì¤ÆÉÔÊØ¤Ê¤³¤È¤¬¤¢¤ë¤·¡¢¤É¤¦¤»TAB¤Ç¼«Ê¬¤ÇÊä´°¤¹¤ë¤Î¤ÇÌµ¸ú²½
+; è‡ªå‹•è£œå®Œã‚’ç„¡åŠ¹
+; ãƒ‘ã‚¹ãŒå‹æ‰‹ã«è£œå®Œã•ã‚Œã¦ä¸ä¾¿ãªã“ã¨ãŒã‚ã‚‹ã—ã€ã©ã†ã›TABã§è‡ªåˆ†ã§è£œå®Œã™ã‚‹ã®ã§ç„¡åŠ¹åŒ–
 (custom-set-variables '(helm-ff-auto-update-initial-value nil))
 
-; C-h¤Ç¥Ğ¥Ã¥¯¥¹¥Ú¡¼¥¹¤ÈÆ±¤¸¤è¤¦¤ËÊ¸»ú¤òºï½ü
+; C-hã§ãƒãƒƒã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã¨åŒã˜ã‚ˆã†ã«æ–‡å­—ã‚’å‰Šé™¤
 (eval-after-load 'helm
   '(progn
      (define-key helm-map (kbd "C-h") 'delete-backward-char)))
@@ -26,7 +26,7 @@
      (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)))
 
 ;------------------------------------------------------------------------------
-; auto-complete¤Î¸õÊä¤òhelm¤Ç¹Ê¤ê¹ş¤à
+; auto-completeã®å€™è£œã‚’helmã§çµã‚Šè¾¼ã‚€
 ;------------------------------------------------------------------------------
 (require 'ac-helm)
 (define-key ac-complete-mode-map (kbd "C-:") 'ac-complete-with-helm)

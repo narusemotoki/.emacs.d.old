@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------
-; Êä´°
+; è£œå®Œ
 ;------------------------------------------------------------------------------
 (require 'auto-complete)
 (require 'auto-complete-config)
@@ -7,24 +7,24 @@
 (ac-config-default)
 (setq ac-ignore-case 'smart)
 
-; ¾ï¤ËYASnippet¤òÊä´°¸õÊä¤Ë
+; å¸¸ã«YASnippetã‚’è£œå®Œå€™è£œã«
 (add-to-list 'ac-sources 'ac-source-yasnippet)
 
-; C-n/C-p¤Ç¸õÊäÁªÂò²ÄÇ½
+; C-n/C-pã§å€™è£œé¸æŠå¯èƒ½
 (setq ac-use-menu-map t)
 
-; ¼«Æ°µ¯Æ°¤µ¤»¤ë
+; è‡ªå‹•èµ·å‹•ã•ã›ã‚‹
 (setq ac-auto-start 0)
 
 ;------------------------------------------------------------------------------
-; ±ÑÃ±¸ì¤ÎÊä´°
+; è‹±å˜èªã®è£œå®Œ
 ; http://d.hatena.ne.jp/kitokitoki/20101205/p2
 ;------------------------------------------------------------------------------
 (defun my-ac-look ()
-  "look ¥³¥Ş¥ó¥É¤Î½ĞÎÏ¤ò¥ê¥¹¥È¤ÇÊÖ¤¹"
+  "look ã‚³ãƒãƒ³ãƒ‰ã®å‡ºåŠ›ã‚’ãƒªã‚¹ãƒˆã§è¿”ã™"
   (interactive)
   (unless (executable-find "look")
-    (error "look ¥³¥Ş¥ó¥É¤¬¤¢¤ê¤Ş¤»¤ó"))
+    (error "look ã‚³ãƒãƒ³ãƒ‰ãŒã‚ã‚Šã¾ã›ã‚“"))
   (let ((search-word (thing-at-point 'word)))
     (with-temp-buffer
       (call-process-shell-command "look" nil t 0 search-word)
@@ -36,19 +36,19 @@
         (ac-candidate-limit t))
   (auto-complete '(ac-source-look))))
 
-; É½¼¨¿ôÀ©¸Â¤òÊÑ¹¹¤·¤Ê¤¤
-; À©¸Â¤¹¤ë¾ì¹ç¤Ï¤³¤³¤ò¥³¥á¥ó¥È¥¢¥¦¥È¤¹¤ë
+; è¡¨ç¤ºæ•°åˆ¶é™ã‚’å¤‰æ›´ã—ãªã„
+; åˆ¶é™ã™ã‚‹å ´åˆã¯ã“ã“ã‚’ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆã™ã‚‹
 (defun ac-complete-look ()
   (interactive)
   (auto-complete '(ac-source-look)))
 
-; 2Ê¸»ú°Ê¾å¤¢¤ë¾ì¹ç¤Ë¤Î¤ßÂĞ±ş¤µ¤»¤ë
+; 2æ–‡å­—ä»¥ä¸Šã‚ã‚‹å ´åˆã«ã®ã¿å¯¾å¿œã•ã›ã‚‹
 (defvar ac-source-look
   '((candidates . my-ac-look)
     (requires . 2)))
 
-; ¸õÊä¤ÎÉ½¼¨ÊıË¡
-; ¼«Æ°(½Å¤¤
+; å€™è£œã®è¡¨ç¤ºæ–¹æ³•
+; è‡ªå‹•(é‡ã„
 ;(push 'ac-source-look ac-sources)
-; Ç¤°Õ¤Î¥¿¥¤¥ß¥ó¥°¤Çµ¯Æ°
+; ä»»æ„ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§èµ·å‹•
 (global-set-key (kbd "M-h") 'ac-complete-look)
