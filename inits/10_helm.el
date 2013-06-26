@@ -13,6 +13,10 @@
 ; TABを押すと現在カーソルがあるものになる
 (define-key helm-c-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
 
+; 自動補完を無効
+; パスが勝手に補完されて不便なことがあるし、どうせTABで自分で補完するので無効化
+(custom-set-variables '(helm-ff-auto-update-initial-value nil))
+
 ; C-hでバックスペースと同じように文字を削除
 (eval-after-load 'helm
   '(progn
