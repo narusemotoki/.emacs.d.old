@@ -20,3 +20,9 @@
 (eval-after-load 'helm-files
   '(progn
      (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)))
+
+;------------------------------------------------------------------------------
+; auto-completeの候補をhelmで絞り込む
+;------------------------------------------------------------------------------
+(require 'ac-helm)
+(define-key ac-complete-mode-map (kbd "C-:") 'ac-complete-with-helm)
