@@ -4,6 +4,9 @@
 (prefer-coding-system 'utf-8)
 (set-language-environment "Japanese")
 
+; *GNU Emacs*バッファを作らない
+(setq inhibit-startup-screen t)
+
 ; 画像ファイルを表示
 (auto-image-file-mode t)
 
