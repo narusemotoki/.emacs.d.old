@@ -1,8 +1,11 @@
 ;------------------------------------------------------------------------------
 ; 基本的な設定
 ;------------------------------------------------------------------------------
+(set-language-environment 'Japanese)
 (prefer-coding-system 'utf-8)
-(set-language-environment "Japanese")
+(setq default-coding-systems 'utf-8)
+(setq file-name-coding-system 'utf-8)
+(setq locale-coding-system 'utf-8)
 
 ; *GNU Emacs*バッファを作らない
 (setq inhibit-startup-screen t)
