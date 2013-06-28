@@ -10,6 +10,10 @@
 ; kill-ringを一覧表示する
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
+; 高速で反応させる
+(setq helm-idle-delay 0.1)
+(setq helm-input-idle-delay 0.1)
+
 ; TABを押すと現在カーソルがあるものになる
 (define-key helm-c-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
 
