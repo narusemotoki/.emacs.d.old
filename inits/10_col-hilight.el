@@ -13,4 +13,3 @@
 ; 色を変更
 (custom-set-faces
  '(col-highlight ((t (:background "#000000")))))
-

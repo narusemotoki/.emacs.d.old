@@ -28,8 +28,9 @@
 ; ウィンドウ内に収まらないときだけ括弧内も光らせる。
 (setq show-paren-style 'mixed)
 
-; 現在行を目立たせる
+; 現在行を下線で目立たせる
 (global-hl-line-mode)
+(setq hl-line-face 'underline)
 
 ; カーソルの位置が何文字目かを表示する
 (column-number-mode t)
