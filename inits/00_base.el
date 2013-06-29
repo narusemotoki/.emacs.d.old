@@ -43,7 +43,7 @@
 (setq-default save-place t)
 
 ; 行の先頭でC-kを一回押すだけで行全体を消去する
-(setq kill-whole-line t)
+;(setq kill-whole-line t)
 
 ; インデントにスペースを使う
 (setq-default indent-tabs-mode nil)
