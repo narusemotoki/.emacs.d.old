@@ -9,3 +9,5 @@
 ; これを入れるとjediを手動<C-tab>で立ち上げないといけない。
 ; (setq jedi:setup-keys t)
 (setq jedi:complete-on-dot t)
+
+(add-hook 'python-mode-hook 'highlight-indentation-mode)
