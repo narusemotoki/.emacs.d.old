@@ -8,3 +8,5 @@
 
 (add-hook 'coffee-mode-hook
   '(lambda() (coffee-custom)))
+
+(add-hook 'coffee-mode-hook 'flymake-coffee-load)
