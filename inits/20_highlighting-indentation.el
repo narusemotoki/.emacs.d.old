@@ -4,5 +4,5 @@
 ; highlight-indentation-mode が呼ばれたら highlight-indentation-current-column-mode も実行する
 (add-hook 'highlight-indentation-mode-hook 'highlight-indentation-current-column-mode)
 
-(set-face-background 'highlight-indentation-face "#E3E3D3")
+(set-face-background 'highlight-indentation-face "gray20")
 (set-face-background 'highlight-indentation-current-column-face "#CC0066")
