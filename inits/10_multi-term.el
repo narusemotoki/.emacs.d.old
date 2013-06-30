@@ -65,3 +65,9 @@
         (if (version< "24.3.5" emacs-version)
             emacs24.3
           old-emacs)))
+
+(add-hook 'term-mode-hook
+          '(lambda ()
+             (define-key term-raw-map (kbd "C-h") 'term-send-backspace)
+             (define-key term-raw-map (kbd "C-y") 'term-paste)
+             ))
