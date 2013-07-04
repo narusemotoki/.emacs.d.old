@@ -5,10 +5,12 @@
 (setq multi-term-program "/usr/bin/zsh")
 
 ; multi-termでは行末のスペースを強調しない
+; yasnipetを無効にする
 (add-hook
   'term-mode-hook
   '(lambda()
     (setq show-trailing-whitespace nil)
+    (setq yas-minor-mode nil)
   )
 )
 
