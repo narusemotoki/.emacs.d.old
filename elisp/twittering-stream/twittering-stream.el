@@ -214,8 +214,9 @@
     (and name text
          (twittering-stream--message "[%s] %s" name text)
          (insert-twitter-streaming-buffer name text)
-         (if (integerp (string-match (format "@%s\\b" twitter-username) text))
-             (olion-notice name text)))))
+         (when (integerp (string-match (format "@%s\\b" twitter-username) text))
+             (olion-notice name text))))
+  t)
 
 (defun twittering-stream--message (fmt &rest args)
   (let* ((msg (apply 'format fmt args))
@@ -286,11 +287,11 @@
 
 (defun insert-twitter-streaming-buffer (username text)
   (save-excursion
-    (let ((buffer (get-buffer-create ":streaming")))
+    (let* ((buffer (get-buffer-create ":streaming")))
           (set-buffer buffer)
           (goto-char (point-min))
-          (insert (format "%s: %s\n\n" username text))
-          )))
+          (insert (format "[%s] %s\n\n" username text))
+          t)))
 
 
 (provide 'twittering-stream)
