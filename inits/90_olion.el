@@ -21,8 +21,3 @@
   (shell-command
    (format "python -c \"import pynotify;pynotify.init('emacs-olion-notice');pynotify.Notification('%s', '%s', 'dialog-information').show()\"" title message))
 )
-
-(defun notice ()
-  (interactive)
-  (olion-notice "a" "b")
-)
