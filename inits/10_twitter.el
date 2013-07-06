@@ -13,14 +13,11 @@
 ; yasnipetを無効にする
 ; streamingを有効にする
 ; streaming用のバッファを作る
-(load "twittering-stream")
 (add-hook
   'twittering-mode-hook
   '(lambda()
     (setq show-trailing-whitespace nil)
     (setq yas-minor-mode nil)
-    (twittering-stream-mode t)
-    (get-buffer-create ":streaming")
   )
 )
 
@@ -36,5 +33,3 @@
 ;        "user_name/list_name"
 ))
 
-; twitterのユーザ名
-(setq twitter-username "narusemotoki")
