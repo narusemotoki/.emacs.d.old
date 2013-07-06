@@ -25,7 +25,8 @@
                                       gnus-group-mode
                                       gnus-summary-mode
                                       gnus-article-mode
-                                      term-mode))
+                                      term-mode
+                                      twittering-mode))
 
 (defadvice linum-on (around linum-on-inhibit-for-modes)
   "Stop the load of linum-mode for some major modes."
