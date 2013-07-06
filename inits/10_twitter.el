@@ -12,6 +12,7 @@
 ; multi-termでは行末のスペースを強調しない
 ; yasnipetを無効にする
 ; streamingを有効にする
+; streaming用のバッファを作る
 (load "twittering-stream")
 (add-hook
   'twittering-mode-hook
@@ -19,6 +20,7 @@
     (setq show-trailing-whitespace nil)
     (setq yas-minor-mode nil)
     (twittering-stream-mode t)
+    (get-buffer-create ":streaming")
   )
 )
 

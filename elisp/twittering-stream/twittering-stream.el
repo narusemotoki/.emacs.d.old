@@ -213,6 +213,7 @@
          (text (cdr (assq 'text json))))
     (and name text
          (twittering-stream--message "[%s] %s" name text)
+         (insert-twitter-streaming-buffer name text)
          (if (integerp (string-match (format "@%s\\b" twitter-username) text))
              (olion-notice name text)))))
 
@@ -282,6 +283,15 @@
 (defun twittering-stream-truncate (msg)
   (truncate-string-to-width
    msg (max 0 (- (frame-width) 10)) nil nil "..."))
+
+(defun insert-twitter-streaming-buffer (username text)
+  (save-excursion
+    (let ((buffer (get-buffer-create ":streaming")))
+          (set-buffer buffer)
+          (goto-char (point-min))
+          (insert (format "%s: %s\n\n" username text))
+          )))
+
 
 (provide 'twittering-stream)
 
