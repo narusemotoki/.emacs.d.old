@@ -14,3 +14,15 @@
     (shell-command-to-string
       (format "python -c \"import sys, urllib;print(urllib.urlopen('%s').read())\""
               (thing-at-point 'url)))))
+
+; 通知を出す
+; sudo apt-get install python-notify2
+(defun olion-notice (title message)
+  (shell-command
+   (format "python -c \"import pynotify;pynotify.init('emacs-olion-notice');pynotify.Notification('%s', '%s', 'dialog-information').show()\"" title message))
+)
+
+(defun notice ()
+  (interactive)
+  (olion-notice "a" "b")
+)

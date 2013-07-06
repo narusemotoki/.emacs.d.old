@@ -26,7 +26,9 @@
 
 ;;; Usage:
 ;;
-;; M-x twittering-stream-mode 
+;; M-x twittering-stream-mode
+
+; 通知のために改変した narusemotoki
 
 (require 'twittering-mode)
 (require 'json)
@@ -52,7 +54,7 @@
         (twittering-stream-mode -1)
         (error "Twittering-mode is not authorized"))
       (unless proc
-        (twittering-stream--open 
+        (twittering-stream--open
          twittering-stream-user-url))
       (setq twittering-stream-mode t)
       (message "Twittering stream enabled.")))))
@@ -64,7 +66,7 @@
         (access-token-secret
          (cdr (assoc "oauth_token_secret"
                      twittering-oauth-access-token-alist))))
-    (twittering-oauth-auth-str-access 
+    (twittering-oauth-auth-str-access
      "GET" url '()
      twittering-oauth-consumer-key twittering-oauth-consumer-secret
      access-token access-token-secret)))
@@ -139,7 +141,7 @@
              (t
               (message "Stream process exited abnormally with HTTP Code: %s" code)))))))))
 
-(defvar twittering-stream-handler-function 
+(defvar twittering-stream-handler-function
   'twittering-stream--default-handler)
 
 (defun twittering-stream--wget-filter (proc event)
@@ -210,7 +212,9 @@
          (name (cdr (assq 'screen_name user)))
          (text (cdr (assq 'text json))))
     (and name text
-         (twittering-stream--message "[%s] %s" name text))))
+         (twittering-stream--message "[%s] %s" name text)
+         (if (integerp (string-match (format "@%s\\b" twitter-username) text))
+             (olion-notice name text)))))
 
 (defun twittering-stream--message (fmt &rest args)
   (let* ((msg (apply 'format fmt args))
@@ -249,7 +253,7 @@
          (buffer (get-buffer-create twittering-stream--popup-buffer)))
     (when (stringp notify)
       (with-current-buffer buffer
-        (when (> (line-number-at-pos (point-max)) 
+        (when (> (line-number-at-pos (point-max))
                  (* twittering-stream-popup-max-threshold 2))
           (goto-char (point-max))
           (forward-line (- twittering-stream-popup-max-threshold))
@@ -281,4 +285,4 @@
 
 (provide 'twittering-stream)
 
-;;; twittering-stream.el ends here
+;;; twittering-stream.el ends her
