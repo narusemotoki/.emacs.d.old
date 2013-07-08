@@ -16,6 +16,8 @@
 ; 自動起動させる
 (setq ac-auto-start t)
 
+(setq ac-auto-show-menu t)
+
 ;------------------------------------------------------------------------------
 ; 英単語の補完
 ; http://d.hatena.ne.jp/kitokitoki/20101205/p2

@@ -9,3 +9,8 @@
 
 ; C-oでmozcの有効、無効を切り替える
 (global-set-key (kbd "C-o") 'toggle-input-method)
+
+; auto-completeとの連携
+; https://github.com/igjit/ac-mozc
+(require 'ac-mozc)
+(define-key ac-mode-map (kbd "M-o") 'ac-mozc-complete)
