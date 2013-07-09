@@ -25,6 +25,8 @@
   "Powerline face 3."
   :group 'powerline)
 
+(cond ((equal window-system 'x)
+  (progn
 (setq-default mode-line-format
               '("%e"
                 (:eval
@@ -68,3 +70,4 @@
                    (concat (powerline-render lhs)
                            (powerline-fill face3 (powerline-width rhs))
                            (powerline-render rhs))))))
+)))
