@@ -29,3 +29,6 @@
 
 ; カーソルの色を変更する
 (set-cursor-color "#CC0066")
+
+; リージョンの色
+(set-face-background 'region "navy")
