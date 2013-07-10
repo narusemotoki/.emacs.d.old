@@ -87,7 +87,7 @@ Run each function of FUNCTIONS list in turn when called within DELAY seconds."
     (unless next
       (set iterator (helm-iter-list (funcall fn)))
       (setq next (helm-iter-next (symbol-value iterator))))
-    (and next (eval iterator) (funcall (nth (1- next) functions)))
+    (and next (eval iterator) (call-interactively (nth (1- next) functions)))
     (when delay (run-with-idle-timer delay nil `(lambda ()
                                                   (setq ,iterator nil))))))
 
@@ -216,7 +216,7 @@ Set it to nil if you don't want this limit."
   :group 'helm
   :type 'integer)
 
-(defcustom helm-idle-delay 0.3
+(defcustom helm-idle-delay 0.1
   "Be idle for this many seconds, before updating in delayed sources.
 This is useful for sources involving heavy operations
 \(like launching external programs\), so that candidates
@@ -229,7 +229,7 @@ Be sure to know what you are doing when modifying this."
   :group 'helm
   :type 'float)
 
-(defcustom helm-input-idle-delay 0.3
+(defcustom helm-input-idle-delay 0.1
   "Be idle for this many seconds, before updating.
 
 Unlike `helm-idle-delay', it is also effective for non-delayed sources.
@@ -850,7 +850,7 @@ not `exit-minibuffer' or unwanted functions."
 
 (defmacro with-helm-temp-hook (hook &rest body)
   "Execute temporarily BODY as a function for HOOK."
-  (declare (indent 0) (debug t))
+  (declare (indent 1) (debug t))
   (let ((fun (gensym "helm-hook")))
     `(progn
        (defun ,fun ()
@@ -1965,7 +1965,7 @@ For ANY-PRESELECT ANY-RESUME ANY-KEYMAP ANY-DEFAULT ANY-HISTORY, See `helm'."
                     (minibuffer-with-setup-hook
                         #'(lambda ()
                             (setq timer (run-with-idle-timer
-                                         (max helm-input-idle-delay 0.1) 'repeat
+                                         (max helm-input-idle-delay 0.01) 'repeat
                                          #'(lambda ()
                                              ;; Stop updating when in persistent action
                                              ;; or when `helm-suspend-update-flag' is
@@ -2473,7 +2473,7 @@ is done on whole `helm-buffer' and not on current source."
              ;; to helm-input-idle-delay
              ;; otherwise use value of helm-input-idle-delay
              ;; or 0.1 if == to 0.
-             (max helm-idle-delay helm-input-idle-delay 0.1) nil
+             (max helm-idle-delay helm-input-idle-delay 0.01) nil
              'helm-process-delayed-sources delayed-sources preselect source)))
         (helm-log "end update")))))
 
@@ -4107,7 +4107,7 @@ This happen after `helm-input-idle-delay' secs."
   (and (not (get-buffer-window helm-action-buffer 'visible))
        (eq (assoc-default 'follow (helm-get-current-source)) 1)
        (sit-for (and helm-input-idle-delay
-                     (max helm-input-idle-delay 0.1)))
+                     (max helm-input-idle-delay 0.01)))
        (helm-window)
        (helm-get-selection)
        (save-excursion
