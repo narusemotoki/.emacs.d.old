@@ -4,6 +4,8 @@
 (require 'multi-term)
 (setq multi-term-program "/usr/bin/zsh")
 
+(global-set-key (kbd "C-c C-t") 'multi-term)
+
 ; multi-termでは行末のスペースを強調しない
 ; yasnipetを無効にする
 (add-hook
@@ -13,7 +15,6 @@
     (setq yas-minor-mode nil)
   )
 )
-
 
 ; global-linum-modeを特定のmodeでのみ無効にする
 ; http://stackoverflow.com/questions/3875213/turning-on-linum-mode-when-in-python-c-mode
