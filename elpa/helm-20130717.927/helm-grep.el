@@ -35,7 +35,7 @@
   :group 'helm)
 
 (defcustom helm-grep-default-command
-  "grep -d skip %e -n%cH -e %p %f"
+  "grep -a -d skip %e -n%cH -e %p %f"
   "Default grep format command for `helm-do-grep-1'.
 Where:
 '%e' format spec is for --exclude or --include grep options or
@@ -75,7 +75,7 @@ NOTE: remote grepping is not available with ack-grep."
   :type  'string)
 
 (defcustom helm-grep-default-recurse-command
-  "grep -d recurse %e -n%cH -e %p %f"
+  "grep -a -d recurse %e -n%cH -e %p %f"
   "Default recursive grep format command for `helm-do-grep-1'.
 See `helm-grep-default-command' for format specs and infos about ack-grep."
   :group 'helm-grep
@@ -303,7 +303,8 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
           
 (defun helm-grep-init (only-files &optional include zgrep)
   "Start an asynchronous grep process in ONLY-FILES list."
-  (let* ((default-directory (expand-file-name helm-ff-default-directory))
+  (let* ((default-directory (or helm-default-directory
+                                (expand-file-name helm-ff-default-directory)))
          (fnargs            (helm-grep-prepare-candidates only-files))
          (ignored-files     (unless (helm-grep-use-ack-p)
                               (mapconcat
@@ -345,8 +346,8 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
                                          (cons ?p (shell-quote-argument
                                                    helm-pattern))
                                          (cons ?f fnargs)))))
-         ;; Use pipe only with grep or git-grep.
-         (process-connection-type (helm-grep-use-ack-p))
+         ;; Use pipe only with grep, zgrep or git-grep.
+         (process-connection-type (and (not zgrep) (helm-grep-use-ack-p)))
          (tramp-verbose helm-tramp-verbose))
     (setq helm-grep-last-cmd-line cmd-line)
     ;; Start grep process.
@@ -368,7 +369,7 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
                          ;; [FIXME] This is a workaround for zgrep
                          ;; that exit with code 1
                          ;; after a certain amount of results.
-                         (not helm-grep-use-zgrep))
+                         (not (with-helm-buffer helm-grep-use-zgrep)))
                     (with-current-buffer helm-buffer
                       (insert (concat "* Exit with code 1, no result found,"
                                       " Command line was:\n\n "
@@ -389,10 +390,6 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
                                       'face 'helm-grep-finish))))))
                    ((string= event "finished\n")
                     (with-helm-window
-                      ;; Make now `helm-grep-default-command' local
-                      ;; to have it in further resuming session.
-                      (set (make-local-variable 'helm-grep-default-command)
-                           helm-grep-default-command)
                       (setq mode-line-format
                             '(" " mode-line-buffer-identification " "
                               (line-number-mode "%l") " "
@@ -417,18 +414,10 @@ It is intended to use as a let-bound variable, DON'T set this globaly.")
                        (replace-regexp-in-string "\n" "" event))))))))))
 
 (defun helm-grep-collect-candidates ()
-  (let* ((helm-grep-default-command
-          (cond (helm-grep-use-zgrep helm-default-zgrep-command)
-                (helm-grep-in-recurse helm-grep-default-recurse-command)
-                ;; When resuming the local value of
-                ;; `helm-grep-default-command' is used, only git-grep
-                ;; should need this.
-                (t helm-grep-default-command)))
-         (helm-ff-default-directory helm-grep-last-default-directory))
-    (funcall helm-grep-default-function
-             helm-grep-last-targets
-             helm-grep-include-files
-             helm-grep-use-zgrep)))
+  (funcall helm-grep-default-function
+           helm-grep-last-targets
+           helm-grep-include-files
+           helm-grep-use-zgrep))
 
 
 ;;; Actions
@@ -786,7 +775,9 @@ in recurse, search being made on `helm-zgrep-file-extension-regexp'."
              helm-ff-default-directory
              (file-remote-p helm-ff-default-directory))
     (error "Error: Remote operation not supported with ack-grep."))
-  (let* ((exts (and recurse (not zgrep)
+  (let* ((exts (and recurse
+                    ;; [FIXME] I could handle this from helm-walk-directory.
+                    (not zgrep) ; zgrep doesn't handle -r opt.
                     (not (helm-grep-use-ack-p :where 'recursive))
                     (or exts (helm-grep-get-file-extensions targets))))
          (include-files (and exts
@@ -797,6 +788,7 @@ in recurse, search being made on `helm-zgrep-file-extension-regexp'."
                                             (remove "*" exts)
                                             exts) " ")))
          (types (and (not include-files)
+                     (not zgrep)
                      recurse
                      ;; When %e format spec is not specified
                      ;; ignore types and do not prompt for choice.
@@ -812,14 +804,26 @@ in recurse, search being made on `helm-zgrep-file-extension-regexp'."
     ;; give a default value to `helm-ff-default-directory'.
     (unless helm-ff-default-directory
       (setq helm-ff-default-directory default-directory))
-    ;; We need these global vars
-    ;; to further pass infos to `helm-resume'.
-    (setq helm-grep-last-targets targets
-          helm-grep-include-files (or include-files types)
-          helm-grep-in-recurse recurse
-          helm-grep-use-zgrep zgrep
-          helm-grep-last-default-directory
-          helm-ff-default-directory)
+    ;; We need to store these vars locally
+    ;; to pass infos later to `helm-resume'.
+    (with-helm-temp-hook 'helm-after-initialize-hook
+      (with-helm-buffer
+        (set (make-local-variable 'helm-zgrep-recurse-flag)
+             (and recurse zgrep))
+        (set (make-local-variable 'helm-grep-last-targets) targets)
+        (set (make-local-variable 'helm-grep-include-files)
+             (or include-files types))
+        (set (make-local-variable 'helm-grep-in-recurse) recurse)
+        (set (make-local-variable 'helm-grep-use-zgrep) zgrep)
+        (set (make-local-variable 'helm-grep-last-default-directory)
+             helm-ff-default-directory)
+        (set (make-local-variable 'helm-grep-default-command)
+             (cond (helm-grep-use-zgrep helm-default-zgrep-command)
+                   (helm-grep-in-recurse helm-grep-default-recurse-command)
+                   ;; When resuming the local value of
+                   ;; `helm-grep-default-command' is used, only git-grep
+                   ;; should need this.
+                   (t helm-grep-default-command)))))
     ;; Setup the source.
     (setq helm-source-grep
           `((name . ,(if zgrep "Zgrep" (capitalize (if recurse
@@ -853,7 +857,8 @@ in recurse, search being made on `helm-zgrep-file-extension-regexp'."
     (and follow (helm-attrset 'follow follow helm-source-grep))
     (helm
      :sources '(helm-source-grep)
-     :buffer (format "*helm %s*" (if zgrep "zgrep" "grep"))
+     :buffer (format "*helm %s*" (if zgrep "zgrep" (helm-grep-command recurse)))
+     :default-directory helm-grep-last-default-directory
      :keymap helm-grep-map ; [1]
      :history 'helm-grep-history)))
 
@@ -876,7 +881,6 @@ in recurse, search being made on `helm-zgrep-file-extension-regexp'."
                                  :match helm-zgrep-file-extension-regexp)
                                 helm-rzgrep-cache))
                            flist)))
-         (when recursive (setq helm-zgrep-recurse-flag t))
          (helm-do-grep-1 only recursive 'zgrep))
     (setq helm-zgrep-recurse-flag nil)))
 

@@ -138,22 +138,35 @@ If `helm-turn-on-show-completion' is nil just do nothing."
           (or (boundp sym) (fboundp sym) (symbol-plist sym)))
         #'fboundp)))
 
-(defun helm-thing-before-point ()
-  "Get symbol name before point."
+(defun helm-thing-before-point (&optional limits)
+  "Return symbol name before point.
+With LIMITS arg specified return the beginning and en position
+of symbol before point."
   (save-excursion
     (let ((beg (point)))
       (when (re-search-backward
              "\\_<" (field-beginning nil nil (point-at-bol)) t)
-        (buffer-substring-no-properties beg (match-end 0))))))
+        (if limits
+            (cons (match-end 0) beg)
+            (buffer-substring-no-properties beg (match-end 0)))))))
 
 (defun helm-bounds-of-thing-before-point ()
   "Get the beginning and end position of `helm-thing-before-point'.
 Return a cons \(beg . end\)."
-  (save-excursion
-    (let ((beg (point)))
-      (when (re-search-backward
-             "\\_<" (field-beginning nil nil (point-at-bol)) t)
-        (cons (match-beginning 0) (match-end 0))))))
+  (helm-thing-before-point 'limits))
+
+(defun helm-insert-completion-at-point (beg end str)
+  ;; When there is no space after point
+  ;; we are completing inside a symbol or
+  ;; after a partial symbol with the next arg aside
+  ;; without space, in this case mark the region.
+  ;; deleting it would remove the
+  ;; next arg which is unwanted.
+  (delete-region beg end)
+  (insert str)
+  (let ((pos (cdr (bounds-of-thing-at-point 'symbol))))
+    (when (< (point) pos)
+      (push-mark pos t t))))
 
 ;;;###autoload
 (defun helm-lisp-completion-at-point ()
@@ -194,12 +207,8 @@ Return a cons \(beg . end\)."
                          (with-helm-current-buffer
                            (run-with-timer
                             0.01 nil
-                            `(lambda ()
-                               (delete-region ,beg ,end)
-                               (insert ,candidate)
-                               (let ((pos (cdr (bounds-of-thing-at-point 'symbol))))
-                                 (when (< (point) pos)
-                                   (delete-region (point) pos)))))))))
+                            'helm-insert-completion-at-point
+                            beg end candidate)))))
            :input (if helm-match-plugin-enabled (concat target " ") target)
            :resume 'noresume
            :allow-nest t))

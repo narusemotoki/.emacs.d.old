@@ -1428,8 +1428,8 @@ If basename contain one or more space fallback to match-plugin.
 If FNAME is a valid directory name,return FNAME unchanged."
   (setq fname (helm-ff-handle-backslash fname))
   (let ((bn      (helm-basename fname))
-        (bd      (if (or (null fname) (string= fname "")) ""
-                     (file-name-as-directory (file-name-directory fname))))
+        (bd   (helm-aif (and fname (file-name-directory fname))
+                  (file-name-as-directory it) ""))
         (dir-p   (file-directory-p fname))
         (tramp-p (loop for (m . f) in tramp-methods
                        thereis (string-match m fname))))
@@ -2228,30 +2228,6 @@ other candidate transformers."
   "Replaces /home/user with ~."
   (helm-transform-mapcar #'helm-shorten-home-path-1 files))
 
-
-;;; List of files gleaned from every dired buffer
-;;
-;;
-(defun helm-files-in-all-dired-candidates ()
-  (save-excursion
-    (mapcan
-     (lambda (dir)
-       (cond ((listp dir)               ;filelist
-              dir)
-             ((equal "" (file-name-nondirectory dir)) ;dir
-              (directory-files dir t))
-             (t                         ;wildcard
-              (file-expand-wildcards dir t))))
-     (delq nil
-           (mapcar (lambda (buf)
-                     (set-buffer buf)
-                     (when (eq major-mode 'dired-mode)
-                       (if (consp dired-directory)
-                           (cdr dired-directory) ;filelist
-                           dired-directory))) ;dir or wildcard
-                   (buffer-list))))))
-;; (dired '("~/" "~/.emacs-custom.el" "~/.emacs.bmk"))
-
 (defun helm-transform-file-load-el (actions candidate)
   "Add action to load the file CANDIDATE if it is an emacs lisp
 file.  Else return ACTIONS unmodified."
@@ -2268,6 +2244,20 @@ Else return ACTIONS unmodified."
           ((string-match "\\.html?$" candidate)
            (append actions (list browse-action)))
           (t actions))))
+
+
+;;; List of files gleaned from every dired buffer
+;;
+;;
+(defun helm-files-in-all-dired-candidates ()
+  (save-excursion
+    (loop for (f . b) in dired-buffers
+          when (buffer-live-p b)
+          append (let ((dir (with-current-buffer b dired-directory)))
+                   (if (listp dir) (cdr dir)
+                       (directory-files f t dired-re-no-dot))))))
+
+;; (dired '("~/" "~/.emacs.d/.emacs-custom.el" "~/.emacs.d/.emacs.bmk"))
 
 (defvar helm-source-files-in-all-dired
   '((name . "Files in all dired buffer.")

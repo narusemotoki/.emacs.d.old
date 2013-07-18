@@ -113,6 +113,8 @@ no need to provide \(lisp-interaction-mode . emacs-lisp-mode\) association."
           do (with-current-buffer buf
                (when (helm-dabbrev--same-major-mode-p buf)
                  (save-excursion
+                   ;; Start searching before thing before point.
+                   (goto-char (- (point) (length str)))
                    ;; search the last 30 lines before point.
                    (funcall search str -2)) ; store pos [1]
                  (save-excursion
@@ -154,19 +156,20 @@ no need to provide \(lisp-interaction-mode . emacs-lisp-mode\) association."
     (keymap . ,helm-dabbrev-map)
     (action . (lambda (candidate)
                 (with-helm-current-buffer
-                  (let* ((limits (bounds-of-thing-at-point 'symbol))
+                  (let* ((limits (helm-bounds-of-thing-before-point))
                          (beg (car limits))
-                         (end (cdr limits)))
-                    (run-with-timer 0.01 nil `(lambda ()
-                                                (delete-region ,beg ,end)
-                                                (insert ,candidate)))))))))
+                         (end (point)))
+                    (run-with-timer
+                     0.01 nil
+                     'helm-insert-completion-at-point
+                     beg end candidate)))))))
 
 ;;;###autoload
 (defun helm-dabbrev ()
   (interactive)
   (declare (special dabbrev))
-  (let ((dabbrev (thing-at-point 'symbol))
-        (limits (bounds-of-thing-at-point 'symbol))
+  (let ((dabbrev (helm-thing-before-point))
+        (limits (helm-bounds-of-thing-before-point))
         (enable-recursive-minibuffers t)
         (helm-execute-action-at-once-if-one t)
         (helm-quit-if-no-candidate
