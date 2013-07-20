@@ -1409,14 +1409,17 @@ systems."
     (append (list dot dot2) ls)))
 
 (defun helm-ff-handle-backslash (fname)
+  ;; Allow creation of filenames containing a backslash.
   (loop with bad = '((92 . ""))
         for i across fname
         for isbad = (assq i bad)
         if isbad concat (cdr isbad)
         else concat (string i)))
 
-;; Internal
-(defvar helm-ff-smart-completion-incompatible-methods '(multi1 multi3p))
+(defun helm-ff-smart-completion-p ()
+  (and helm-ff-smart-completion
+       (not (memq helm-mp-matching-method '(multi1 multi3p)))))
+
 (defun helm-ff-transform-fname-for-completion (fname)
   "Maybe return FNAME with it's basename modified as a regexp.
 This happen only when `helm-ff-smart-completion' is enabled.
@@ -1426,31 +1429,32 @@ If FNAME is an url returns it unmodified.
 When FNAME contain a space fallback to match-plugin.
 If basename contain one or more space fallback to match-plugin.
 If FNAME is a valid directory name,return FNAME unchanged."
+  ;; handle bad filenames containing a backslash.
   (setq fname (helm-ff-handle-backslash fname))
   (let ((bn      (helm-basename fname))
-        (bd   (helm-aif (and fname (file-name-directory fname))
-                  (file-name-as-directory it) ""))
+        (bd      (or (helm-basedir fname) "")) 
         (dir-p   (file-directory-p fname))
         (tramp-p (loop for (m . f) in tramp-methods
                        thereis (string-match m fname))))
-    (if (or (not helm-ff-smart-completion)
-            (memq helm-mp-matching-method
-                  helm-ff-smart-completion-incompatible-methods)
-            (string-match "\\s-" bn)      ; Fall back to match-plugin.
-            (string-match "[*][.]?.*" bn) ; Allow entering wilcard.
-            (string-match "/$" fname)     ; Allow mkdir.
-            dir-p
-            (string-match helm-ff-url-regexp fname)
-            (and (string= helm-ff-default-directory "/") tramp-p))
-        ;; Don't treat wildcards ("*") as regexp char.
-        ;; (e.g ./foo/*.el => ./foo/[*].el)
-        (cond (dir-p (regexp-quote fname))
-              (t     (concat (regexp-quote bd)
-                             (replace-regexp-in-string "[*]" "[*]" bn))))
-        (setq bn (if (> (length bn) 2) ; wait 3nd char before concating.
-                     (helm-ff-mapconcat-candidate bn)
-                     (concat ".*" bn)))
-        (concat (regexp-quote bd) bn))))
+    ;; Always regexp-quote base directory name to handle
+    ;; crap dirnames such e.g bookmark+
+    (cond (dir-p (regexp-quote fname))
+          ((or (not (helm-ff-smart-completion-p))
+               (string-match "\\s-" bn)) ; Fall back to match-plugin.
+           (concat (regexp-quote bd) bn))
+          ((or (string-match "[*][.]?.*" bn) ; Allow entering wilcard.
+               (string-match "/$" fname)     ; Allow mkdir.
+               (string-match helm-ff-url-regexp fname)
+               (and (string= helm-ff-default-directory "/") tramp-p))
+           ;; Don't treat wildcards ("*") as regexp char.
+           ;; (e.g ./foo/*.el => ./foo/[*].el)
+           (concat (regexp-quote bd)
+                   (replace-regexp-in-string "[*]" "[*]" bn)))
+          (t
+           (setq bn (if (> (length bn) 2) ; wait 3nd char before concating.
+                        (helm-ff-mapconcat-candidate bn)
+                        (concat ".*" bn)))
+           (concat (regexp-quote bd) bn)))))
 
 (defun helm-ff-mapconcat-candidate (candidate)
   "Transform string CANDIDATE in regexp.
@@ -1690,7 +1694,7 @@ Don't use it directly in `filtered-candidate-transformer' use instead
                       (propertize disp 'face 'helm-ff-executable) t)
                      i))
               ;; A file.
-              ((and attr (eq nil type))
+              ((and attr (null type))
                (cons (helm-ff-prefix-filename
                       (propertize disp 'face 'helm-ff-file) t)
                      i))
