@@ -1,0 +1,4 @@
+# -*- coding: utf-8 -*-
+# contributor: Naruse Motoki<motoki@naru.se>
+# --
+<script src="$1">$2</script>
