@@ -1,0 +1,15 @@
+;; sample setting
+(load "TypeScript")
+(add-to-list 'auto-mode-alist '("\\.ts" . typescript-mode))
+
+(require 'typescript-tss)
+(require 'auto-complete-ts)
+(defun my-ac-ts-mode-setup ()
+  (local-set-key "\C-c\C-t" 'typescript-tss-show-type)
+  (local-set-key "\C-c\C-d" 'typescript-tss-goto-definition)
+  (setq ac-sources (append '(ac-source-ts ac-source-yasnippet) ac-sources)))
+(add-hook 'typescript-mode-hook 'my-ac-ts-mode-setup)
+(setq ac-ts-auto-save nil)
+(add-to-list 'ac-modes 'typescript-mode)
+
+(load "flymake-typescript")
