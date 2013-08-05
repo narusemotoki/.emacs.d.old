@@ -1,11 +1,11 @@
 ;;; epc.el --- A RPC stack for the Emacs Lisp
 
-;; Copyright (C) 2011, 2012  Masashi Sakurai
+;; Copyright (C) 2011, 2012, 2013  Masashi Sakurai
 
 ;; Author: SAKURAI Masashi <m.sakurai at kiwanami.net>
 ;; Version: 0.1.1
 ;; Keywords: lisp, rpc
-;; Package-Requires: ((concurrent "0.3.1") (ctable "0.1.1"))
+;; Package-Requires: ((concurrent "0.3.1") (ctable "0.1.2"))
 ;; URL: https://github.com/kiwanami/emacs-epc
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -83,7 +83,8 @@
 (defun epc:uid ()
   (incf epc:uid))
 
-(defvar epc:accept-process-timeout 100 "[internal] msec")
+(defvar epc:accept-process-timeout 150  "Asynchronous timeout time. (msec)")
+(defvar epc:accept-process-timeout-count 100 " Startup function waits (`epc:accept-process-timeout' * `epc:accept-process-timeout-count') msec for the external process getting ready.")
 
 
 (defstruct epc:connection
@@ -402,7 +403,7 @@ to see full traceback:\n%s" port-str))
           (setq cont nil))
          (t
           (incf cont)
-          (when (< 30 cont) ; timeout 3 seconds
+          (when (< epc:accept-process-timeout-count cont) ; timeout 15 seconds
             (error "Timeout server response."))))))
     (set-process-query-on-exit-flag process nil)
     (make-epc:manager :server-process process
