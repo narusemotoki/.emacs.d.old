@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# name: interface
+# key: interface
+# --
+interface ${1:Name}${2: extends ${3:Parent}} {
+    $0
+}

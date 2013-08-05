@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# name: module
+# key: module
+# --
+module ${1:ModuleName} {
+    $0
+}

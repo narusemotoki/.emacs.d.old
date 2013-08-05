@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+# name: class
+# key: class
+# --
+class ${1:Name}${2: extends ${3:Parent}} {
+    constructor() {
+        $0
+    }
+}
