@@ -15,7 +15,9 @@
     (python-mode . "Py")
     (ruby-mode   . "Rb")
     (emacs-lisp-mode . "El")
-    (markdown-mode . "Md")))
+    (markdown-mode . "Md")
+    (typescript-mode . "TS")
+    (coffee-mode . "Cof")))
 
 (defun clean-mode-line ()
   (interactive)
