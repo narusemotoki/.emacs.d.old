@@ -11,4 +11,5 @@
   (set (make-local-variable 'tab-width) 2)
 )
 (add-hook 'web-mode-hook 'web-mode-custom-hook)
-(add-hook 'web-mode-hook 'highlight-indentation-mode)
+; これが有効だとweb-modeのハイライトが無効になってしまう
+;(add-hook 'web-mode-hook 'highlight-indentation-mode)
