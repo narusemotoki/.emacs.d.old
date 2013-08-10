@@ -87,7 +87,7 @@ Run each function of FUNCTIONS list in turn when called within DELAY seconds."
     (unless next
       (set iterator (helm-iter-list (funcall fn)))
       (setq next (helm-iter-next (symbol-value iterator))))
-    (and next (eval iterator) (call-interactively (nth (1- next) functions)))
+    (and next (symbol-value iterator) (call-interactively (nth (1- next) functions)))
     (when delay (run-with-idle-timer delay nil `(lambda ()
                                                   (setq ,iterator nil))))))
 
@@ -604,8 +604,8 @@ It is disabled by default because `helm-debug-buffer' grows quickly.")
   "Variable `buffer-file-name' when `helm' is invoked.")
 (defvar helm-default-directory nil
   "The value of `default-directory' when `helm' is initialized.")
-(defvar helm-candidate-cache nil
-  "Holds the available candidate withing a single helm invocation.")
+(defvar helm-candidate-cache (make-hash-table :test 'equal)
+  "Holds the available candidate within a single helm invocation.")
 (defvar helm-pattern ""
   "The input pattern used to update the helm buffer.")
 (defvar helm-input ""
@@ -1323,20 +1323,31 @@ in the source where point is."
 (defun helm-compose (arg-lst func-lst)
   "Apply arguments specified in ARG-LST with each function of FUNC-LST.
 The result of each function will be the new `car' of ARG-LST.
-Each function in FUNC-LST must accept (length ARG-LST) arguments.
+Each function in FUNC-LST must accept (length ARG-LST) arguments
+\(See examples below) .
 This function allows easy sequencing of transformer functions.
 Where generally, ARG-LST is '(candidates-list source) and FUNC-LST a
 list of transformer functions that take one or two arguments depending
 we are using 'filtered-candidate-transformer' or 'candidate-transformer'.
 e.g
+filtered-candidate-transformer:
 \(helm-compose '((1 2 3 4 5 6 7)
-                '(\"a\" \"b\" \"c\" \"d\" \"e\"))
+                '((name . \"An helm source\") (candidates . (a b c))))
               '((lambda (candidates source)
                   (loop for i in candidates
                         when (oddp i) collect i))
                 (lambda (candidates source)
                   (loop for i in candidates collect (1+ i)))))
-=>(2 4 6 8)."
+=>(2 4 6 8)
+
+candidate-transformer:
+\(helm-compose '((1 2 3 4 5 6 7))
+                '((lambda (candidates)
+                  (loop for i in candidates
+                        when (oddp i) collect i))
+                (lambda (candidates)
+                  (loop for i in candidates collect (1+ i)))))
+=> (2 4 6 8)."
   (dolist (func func-lst)
     (setcar arg-lst (apply func arg-lst)))
   (car arg-lst))
@@ -1347,8 +1358,7 @@ This is used in transformers to modify candidates list."
   (if (functionp funcs)
       (apply 'helm-funcall-with-source source funcs args)
       (apply 'helm-funcall-with-source source
-             (lambda (&rest args)
-               (helm-compose args funcs))
+             (lambda (&rest oargs) (helm-compose oargs funcs))
              args)))
 
 
@@ -1872,7 +1882,7 @@ For ANY-RESUME ANY-INPUT ANY-DEFAULT and ANY-SOURCES See `helm'."
                                     (thing-at-point 'symbol))))
                          ""))
   (setq helm-input "")
-  (setq helm-candidate-cache nil)
+  (clrhash helm-candidate-cache)
   (helm-create-helm-buffer)
   (helm-log-run-hook 'helm-after-initialize-hook))
 
@@ -2163,10 +2173,8 @@ Helm plug-ins are realized by this function."
            candidates)
           ((null candidates) candidates)
           ((listp candidates)
-           ;; Filter candidates now with `candidate-transformer' function maybe
-           ;; otherwise return CANDIDATES which will be passed to
-           ;; `filtered-candidate-transformer', which in turn will maybe filter
-           ;; them or return them unmodified.
+           ;; Transform candidates with `candidate-transformer' functions if
+           ;; some, otherwise return candidates.
            (helm-transform-candidates candidates source))
           (t (funcall type-error)))))
 
@@ -2183,7 +2191,7 @@ Helm plug-ins are realized by this function."
   "Return the cached value of candidates for SOURCE.
 Cache the candidates if there is not yet a cached value."
   (let* ((name (assoc-default 'name source))
-         (candidate-cache (assoc name helm-candidate-cache)))
+         (candidate-cache (gethash name helm-candidate-cache)))
     (cond (candidate-cache
            (helm-log "use cached candidates")
            (cdr candidate-cache))
@@ -2199,8 +2207,7 @@ Cache the candidates if there is not yet a cached value."
                     (set-process-filter candidates 'helm-output-filter)
                     (setq candidates nil))
                    ((not (assoc 'volatile source))
-                    (setq candidate-cache (cons name candidates))
-                    (push candidate-cache helm-candidate-cache)))
+                    (puthash name candidates helm-candidate-cache)))
              candidates)))))
 
 
@@ -2554,10 +2561,7 @@ if specified."
 
 (defun helm-remove-candidate-cache (source)
   "Remove SOURCE from `helm-candidate-cache'."
-  (setq helm-candidate-cache
-        (delete (assoc (assoc-default 'name source)
-                       helm-candidate-cache)
-                helm-candidate-cache)))
+  (remhash (assoc-default 'name source) helm-candidate-cache))
 
 (defun helm-insert-match (match insert-function source)
   "Insert MATCH into `helm-buffer' with INSERT-FUNCTION for SOURCE.
