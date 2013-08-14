@@ -818,8 +818,10 @@ not `exit-minibuffer' or unwanted functions."
 (defmacro with-helm-current-buffer (&rest body)
   "Eval BODY inside `helm-current-buffer'."
   (declare (indent 0) (debug t))
-  `(with-current-buffer (or helm-current-buffer
-                            (current-buffer))
+  `(with-current-buffer (or (and (buffer-live-p helm-current-buffer)
+                                 helm-current-buffer)
+                            (setq helm-current-buffer
+                                  (current-buffer)))
      ,@body))
 
 (defmacro with-helm-buffer (&rest body)

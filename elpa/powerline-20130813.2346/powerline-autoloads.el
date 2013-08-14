@@ -5,7 +5,7 @@
 
 ;;;### (autoloads (powerline-fill powerline-raw defpowerline powerline-concat
 ;;;;;;  powerline-mouse powerline-hud) "powerline" "powerline.el"
-;;;;;;  (20944 1410))
+;;;;;;  (21003 40439))
 ;;; Generated autoloads from powerline.el
 
 (autoload 'powerline-hud "powerline" "\
@@ -56,7 +56,7 @@ Return empty space using FACE and leaving RESERVE space on the right.
 
 ;;;### (autoloads (powerline-nano-theme powerline-vim-theme powerline-center-theme
 ;;;;;;  powerline-default-theme) "powerline-themes" "powerline-themes.el"
-;;;;;;  (20944 1410))
+;;;;;;  (21003 40439))
 ;;; Generated autoloads from powerline-themes.el
 
 (autoload 'powerline-default-theme "powerline-themes" "\
@@ -82,7 +82,7 @@ Setup a nano-like mode-line.
 ;;;***
 
 ;;;### (autoloads nil nil ("powerline-pkg.el" "powerline-separators.el")
-;;;;;;  (20944 1410 925816))
+;;;;;;  (21003 40439 928585))
 
 ;;;***
 
