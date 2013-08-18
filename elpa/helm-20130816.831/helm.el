@@ -312,8 +312,9 @@ NOTE: This have no effect in asynchronous sources, you will
 have to implement a similar feature directly in the process.
 See in helm-grep.el how it is implemented."
   :group 'helm
-  :type 'symbol)
-
+  :type '(choice (const :tag "Ignore case" t)
+                 (const :tag "Respect case" nil)
+                 (other :tag "Smart" 'smart)))
 
 (defcustom helm-file-name-case-fold-search
   (if (memq system-type
@@ -2195,23 +2196,21 @@ Helm plug-ins are realized by this function."
 Cache the candidates if there is not yet a cached value."
   (let* ((name (assoc-default 'name source))
          (candidate-cache (gethash name helm-candidate-cache)))
-    (cond (candidate-cache
-           (helm-log "use cached candidates")
-           (cdr candidate-cache))
-          (t
-           (helm-log "calculate candidates")
-           (let ((candidates (helm-get-candidates source)))
-             (cond ((processp candidates)
-                    (push (cons candidates
-                                (append source
-                                        (list (cons 'item-count 0)
-                                              (cons 'incomplete-line ""))))
-                          helm-async-processes)
-                    (set-process-filter candidates 'helm-output-filter)
-                    (setq candidates nil))
-                   ((not (assoc 'volatile source))
-                    (puthash name candidates helm-candidate-cache)))
-             candidates)))))
+    (helm-aif candidate-cache 
+        (prog1 it (helm-log "Use cached candidates"))
+      (helm-log "No cached candidates, calculate candidates")
+      (let ((candidates (helm-get-candidates source)))
+        (cond ((processp candidates)
+               (push (cons candidates
+                           (append source
+                                   (list (cons 'item-count 0)
+                                         (cons 'incomplete-line ""))))
+                     helm-async-processes)
+               (set-process-filter candidates 'helm-output-filter)
+               (setq candidates nil))
+              ((not (assoc 'volatile source))
+               (puthash name candidates helm-candidate-cache)))
+        candidates))))
 
 
 ;;; Core: candidate transformers
