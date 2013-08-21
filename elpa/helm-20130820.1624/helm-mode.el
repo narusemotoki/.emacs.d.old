@@ -166,14 +166,18 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
 
 (defun helm-cr-default-transformer (candidates source)
   "Default filter candidate function for `helm-comp-read'."
-  (loop for cand in candidates
-        if (and (equal cand helm-pattern)
-                helm-cr-unknow-pattern-flag)
+  (loop with lst for c in candidates
+        for cand = (replace-regexp-in-string "\\s\\" "" c)
+        for pat = (replace-regexp-in-string "\\s\\" "" helm-pattern)
+        if (and (equal cand pat) helm-cr-unknow-pattern-flag)
         collect
-        (cons (concat (propertize " " 'display (propertize
-                                                "[?]" 'face 'helm-ff-prefix))
-                      cand) cand)
-        else collect cand))
+        (cons (concat (propertize
+                       " " 'display
+                       (propertize "[?]" 'face 'helm-ff-prefix))
+                      cand)
+              cand) into lst
+        else collect cand into lst
+        finally return (helm-fast-remove-dups lst :test 'equal)))
 
 ;;;###autoload
 (defun* helm-comp-read (prompt collection
@@ -316,8 +320,11 @@ that use `helm-comp-read' See `helm-M-x' for example."
                        (filtered-candidate-transformer
                         . (lambda (candidates sources)
                             (loop for i in candidates
-                                  do (set-text-properties 0 (length i) nil i)
-                                  collect i)))
+                                  ;; Input is added to history in completing-read's
+                                  ;; and may be regexp-quoted, so unquote it.
+                                  for cand = (replace-regexp-in-string "\\s\\" "" i)
+                                  do (set-text-properties 0 (length cand) nil cand)
+                                  collect cand)))
                        (persistent-action . ,persistent-action)
                        (persistent-help . ,persistent-help)
                        (mode-line . ,mode-line)
@@ -507,9 +514,11 @@ It should be used when candidate list don't need to rebuild dynamically."
      ;; If DEF is not provided, fallback to empty string
      ;; to avoid `thing-at-point' to be appended on top of list
      :default (or default "")
-     ;; FIXME: May fail with special characters (e.g in gnus "nnimap+gmail:")
-     ;; i.e using regexp-quote is unwanted in some other places e.g w3m.
-     :initial-input (and (stringp init) init))))
+     ;; Fail with special characters (e.g in gnus "nnimap+gmail:")
+     ;; if regexp-quote is not used.
+     ;; when init is added to history, it will be unquoted by
+     ; helm-comp-read.
+     :initial-input (and (stringp init) (regexp-quote init)))))
 
 (defun helm-completing-read-with-cands-in-buffer
     (prompt collection test require-match

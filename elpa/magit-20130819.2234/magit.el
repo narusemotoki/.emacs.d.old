@@ -130,6 +130,47 @@ Also set the local value in all Magit buffers and refresh them.
   :group 'magit
   :type 'string)
 
+(defcustom magit-git-editor t
+  "The $GIT_EDITOR used by special git subprocesses.
+
+Some actions (most importantly committing) create a git subprocess
+which then connects to an editor to get more information from the
+user (e.g. the commit message).  That editor should be the Emacs
+process used to initiate the action.  To make this possible Magit
+starts the server if it is not running yet and optionally sets
+$GIT_EDITOR around calls to such subprocesses.
+
+There are multiple ways in which users can (not) have configured
+client/server interaction.  The `magit-with-git-editor-setup'
+macro is used to sanitize user settings.  However this does not
+always work, and it might therefore be necessary to customize
+this option.
+
+Possible values are:
+
+`any'   If $GIT_EDITOR is set, use that regardless of its value.
+        Else if $EDITOR is set, use that regardless of its value.
+        Else fallback to letting Magit guess.
+t       Use $GIT_EDITOR if it contains substring \"emacsclient\".
+        Else use $EDITOR if it contains \"emacsclient\".
+        Else fallback to letting Magit guess.
+nil     Let Magit guess proper $GIT_EDITOR.
+STRING  Explicitly set $GIT_EDITOR.  This is a single string,
+        arguments are separated using whitespace.
+
+In most cases it is better to properly set $GIT_EDITOR system
+wide instead of configuring this option.  Add something like this
+to an appropriate file:
+
+    export GIT_EDITOR=\"[/path/to/]emacsclient -a [/path/to/]emacs\""
+  :group 'magit
+  :type
+  '(choice
+    (const  :tag "Use any $GIT_EDITOR or $EDITOR" any)
+    (const  :tag "Use $GIT_EDITOR or $EDITOR containing \"emacsclient\"" t)
+    (const  :tag "Let Magit guess" nil)
+    (string :tag "Set explicitly")))
+
 (defcustom magit-gitk-executable
   (concat (file-name-directory magit-git-executable) "gitk")
   "The name of the Gitk executable."
@@ -334,7 +375,7 @@ If t, use ptys: this enables magit to prompt for passphrases when needed."
                  (const :tag "pty" t)))
 
 (defcustom magit-process-yes-or-no-prompt-regexp
-  " [\[(]\\([Yy]\\(?:es\\)?\\)[/|]\\([Nn]o?\\)[\])]\\? ?$"
+   " [\[(]\\([Yy]\\(?:es\\)?\\)[/|]\\([Nn]o?\\)[\])] ?[?:] ?$"
   "Regexp matching Yes-or-No prompts of git and its subprocesses."
   :group 'magit
   :type 'regexp)
@@ -1406,19 +1447,38 @@ that happens that is not considered an error; the forms in BODY
 are always evaluated.  The worst thing that could happen is that
 you end up in vi and don't know how to exit."
   (declare (indent 1))
-  (let ((git-window (cl-gensym "git-server-window")))
-    `(let ((process-environment process-environment)
-           (emacsclient (executable-find "emacsclient"))
-           (,git-window ,server-window))
-
+  (let ((window (cl-gensym "window"))
+        (bindir (cl-gensym "bindir"))
+        (client (cl-gensym "client")))
+    `(let* ((process-environment process-environment)
+            (magit-process-popup-time -1)
+            (,window ,server-window)
+            (,bindir (ignore-errors
+                       (file-name-directory
+                        (cdr (assq 'args
+                                   (process-attributes (emacs-pid)))))))
+            (,client (and ,bindir
+                          (expand-file-name "emacsclient" ,bindir))))
+       (unless (and ,client (file-executable-p ,client))
+         (setq ,client (executable-find "emacsclient")))
        (unless (magit-server-running-p)
          (server-start))
        (cond
-        ((not emacsclient)
+        ((or (and (eq magit-git-editor 'any)
+                  (or (getenv "GIT_EDITOR")
+                      (getenv "EDITOR")))
+             (and (eq magit-git-editor t)
+                  (if (getenv "GIT_EDITOR")
+                      (string-match-p "emacsclient" (getenv "GIT_EDITOR"))
+                    (ignore-errors
+                      (string-match-p "emacsclient" (getenv "EDITOR")))))))
+        ((stringp magit-git-editor)
+         (setenv "GIT_EDITOR" magit-git-editor))
+        ((not ,client)
          (message (concat "Cannot find emacsclient (check $PATH); "
                           "using default $GIT_EDITOR")))
         ((string= server-name "server")
-         (setenv "GIT_EDITOR" emacsclient))
+         (setenv "GIT_EDITOR" ,client))
         ((eq system-type 'windows-nt)
          ;; Doing so might actually be possible - we just don't know
          ;; how.  Also we cannot experiment because we don't own a
@@ -1426,18 +1486,23 @@ you end up in vi and don't know how to exit."
          (message (concat "Cannot set server name on Windows; "
                           "using default $GIT_EDITOR")))
         (t
-         (setenv "GIT_EDITOR" (format "%s -s %s" emacsclient server-name))))
+         (setenv "GIT_EDITOR" (format "%s -s %s%s" ,client
+                                      (or (ignore-errors
+                                            (file-name-as-directory
+                                             server-socket-dir))
+                                          "")
+                                      server-name))))
        ;; Git has to be called asynchronously in BODY or we create a
        ;; dead lock.  By the time `emacsclient' is called the dynamic
        ;; binding is no longer in effect and our primitives don't
-       ;; support callbacks.  Temporarily the default value and
-       ;; restore it using a timer.
-       (unless (equal ,git-window server-window)
+       ;; support callbacks.  Temporarily set the default value and
+       ;; restore the old value using a timer.
+       (unless (equal ,window server-window)
          (run-at-time "0.2 sec" nil
                       (apply-partially (lambda (value)
                                          (setq server-window value))
                                        server-window))
-         (setq-default server-window ,git-window))
+         (setq-default server-window ,window))
        ,@body)))
 
 ;;; Revisions and Ranges
@@ -4198,6 +4263,7 @@ insert a line to tell how to insert more of them"
            `(,@(and magit-have-abbrev   (list "--no-abbrev-commit"))
              ,@(and magit-have-decorate (list "--decorate=full"))
              ,@(and magit-show-diffstat (list "--stat"))
+             ,@magit-diff-options
              "--cc"
              "-p" ,commit))))
 
@@ -5414,8 +5480,7 @@ the message from the file the message buffer was saved to.
                (member "--all"         magit-custom-options)
                (member "--amend"       magit-custom-options)
                (and amendp (setq magit-custom-options
-                                 (cons "--amend"
-                                       magit-custom-options)))))
+                                 (cons "--amend" magit-custom-options)))))
       (if (and (magit-rebase-info)
                (y-or-n-p "Nothing staged.  Continue in-progress rebase? "))
           (magit-run-git-async "rebase" "--continue")
@@ -5426,15 +5491,22 @@ the message from the file the message buffer was saved to.
 
 ;;;; Tagging
 
-(magit-define-command tag (name rev)
+(magit-define-command tag (name rev &optional annotate)
   "Create a new tag with the given NAME at REV.
 With a prefix argument annotate the tag.
-\('git tag [-a] NAME REV')."
+\('git tag [--annotate] NAME REV')."
   (interactive (list (magit-read-tag "Tag name: ")
                      (magit-read-rev "Place tag on: "
-                                     (or (magit-default-rev) "HEAD"))))
-  (apply #'magit-run-git-async "tag"
-         (append magit-custom-options (list name rev))))
+                                     (or (magit-default-rev) "HEAD"))
+                     current-prefix-arg))
+  (if (or (member "--annotate" magit-custom-options)
+          (and annotate (setq magit-custom-options
+                              (cons "--annotate" magit-custom-options))))
+      (magit-with-git-editor-setup magit-server-window-for-commit
+        (apply #'magit-run-git-async "tag"
+               (append magit-custom-options (list name rev))))
+    (apply #'magit-run-git "tag"
+           (append magit-custom-options (list name rev)))))
 
 (magit-define-command delete-tag (name)
   "Delete the tag with the given NAME.

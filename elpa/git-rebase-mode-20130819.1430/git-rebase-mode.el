@@ -5,7 +5,7 @@
 
 ;; Author: Phil Jackson <phil@shellarchive.co.uk>
 ;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
-;; Version: 20130816.1824
+;; Version: 20130819.1430
 ;; X-Original-Version: 0.14.0
 ;; Homepage: https://github.com/magit/git-modes
 ;; Keywords: convenience vc git
@@ -337,7 +337,7 @@ running 'man git-rebase' at the command line) for details."
    (list git-rebase-dead-line-re 0 ''git-rebase-killed-action-face t))
   "Font lock keywords for Git-Rebase mode.")
 
-(defun git-rebase-show-keybindings ()
+(defun git-rebase-mode-show-keybindings ()
   "Modify the \"Commands:\" section of the comment Git generates
 at the bottom of the file so that in place of the one-letter
 abbreviation for the command, it shows the command's keybinding.
