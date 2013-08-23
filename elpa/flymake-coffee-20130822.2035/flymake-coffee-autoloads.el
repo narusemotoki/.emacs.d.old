@@ -4,7 +4,7 @@
 
 
 ;;;### (autoloads (flymake-coffee-load) "flymake-coffee" "flymake-coffee.el"
-;;;;;;  (20995 50003))
+;;;;;;  (21015 61530))
 ;;; Generated autoloads from flymake-coffee.el
 
 (autoload 'flymake-coffee-load "flymake-coffee" "\
@@ -14,8 +14,8 @@ Configure flymake mode to check the current buffer's coffeescript syntax.
 
 ;;;***
 
-;;;### (autoloads nil nil ("flymake-coffee-pkg.el") (20995 50003
-;;;;;;  160022))
+;;;### (autoloads nil nil ("flymake-coffee-pkg.el") (21015 61530
+;;;;;;  265201))
 
 ;;;***
 

@@ -1287,6 +1287,11 @@ the current git repository."
     (when (and head (string-match "^refs/heads/" head))
       (substring head 11))))
 
+(defun magit-get-previous-branch ()
+  "Return the refname of the previously checked out branch.
+Return nil if the previously checked out branch no longer exists."
+  (magit-name-rev (magit-git-string "rev-parse" "--verify" "@{-1}")))
+
 (defun magit-get-current-tag (&optional with-distance-p)
   "Return the closest tag reachable from \"HEAD\".
 
@@ -2651,8 +2656,7 @@ magit-topgit and magit-svn"
         (magit-refresh-buffer magit-process-client-buffer)))))
 
 (defun magit-process-filter (proc string)
-  (save-current-buffer
-    (set-buffer (process-buffer proc))
+  (with-current-buffer (process-buffer proc)
     (let ((inhibit-read-only t))
       (magit-process-yes-or-no-prompt proc string)
       (magit-process-username-prompt  proc string)
@@ -4985,20 +4989,7 @@ If no branch is found near the cursor return nil."
            ((wazzup)
             info)
            (t
-            (magit-configure-have-grep-reflog)
-            (let ((lines
-                   (if magit-have-grep-reflog
-                       (magit-git-lines "log"
-                                        "--pretty=oneline" "--max-count=1"
-                                        "--walk-reflogs" "--grep-reflog"
-                                        "moving from")
-                     (magit-git-lines "reflog"))))
-              (while (and lines
-                          (not (string-match "moving from \\([^\s\t]+?\\) to"
-                                             (car lines))))
-                (setq lines (cdr lines)))
-              (when lines
-                (match-string 1 (car lines))))))))
+            (magit-get-previous-branch)))))
     (when (stringp branch)
       branch)))
 
@@ -5600,7 +5591,6 @@ With prefix argument, changes in staging area are kept.
            (setq magit-currently-shown-stash stash-id)
            (display-buffer buf)
            (with-current-buffer buf
-             (set-buffer buf)
              (goto-char (point-min))
              (let* ((range (cons (concat stash "^2^") stash))
                     (magit-current-diff-range range)
