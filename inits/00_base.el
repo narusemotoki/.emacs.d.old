@@ -50,12 +50,11 @@
 ; 行番号の表示
 (global-linum-mode t)
 
-; gutter-modeと相性が悪かった
 ; linum-modeを軽くする
 ; http://qiita.com/takc923/items/acebbdae04994de16c6d
-;(setq linum-delay t)
-;(defadvice linum-schedule (around my-linum-schedule () activate)
-;  (run-with-idle-timer 0.1 nil #'linum-update-current))
+(setq linum-delay t)
+(defadvice linum-schedule (around my-linum-schedule () activate)
+  (run-with-idle-timer 0.1 nil #'linum-update-current))
 
 ; yes or noをy or nにする
 (fset 'yes-or-no-p 'y-or-n-p)
