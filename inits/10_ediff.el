@@ -12,6 +12,7 @@
   (set-face-attribute 'diff-refine-change nil
                       :foreground nil :background nil
                       :weight 'bold :inverse-video t))
+
 (add-hook 'diff-mode-hook 'diff-mode-setup-faces)
 
 ;; diffを表示したらすぐに文字単位での強調表示も行う
@@ -29,3 +30,9 @@
   ;; diffの表示設定が上書きされてしまうのでハイライトを無効にする
   (set-face-attribute 'magit-item-highlight nil :inherit nil))
 (add-hook 'magit-mode-hook 'magit-setup-diff)
+
+(eval-after-load 'magit
+  '(progn
+     (set-face-bold-p 'magit-item-highlight nil)
+     (set-face-background 'magit-item-highlight nil)
+     (set-face-foreground 'magit-diff-file-header "#f1f1f1")))
