@@ -5,7 +5,7 @@
 
 ;;;### (autoloads (powerline-fill powerline-raw defpowerline powerline-concat
 ;;;;;;  powerline-mouse powerline-hud) "powerline" "powerline.el"
-;;;;;;  (21003 40439))
+;;;;;;  (21034 32439))
 ;;; Generated autoloads from powerline.el
 
 (autoload 'powerline-hud "powerline" "\
@@ -50,13 +50,13 @@ Return empty space using FACE and leaving RESERVE space on the right.
 
 (defpowerline powerline-buffer-id (format-mode-line mode-line-buffer-identification))
 
-(defpowerline powerline-process (cond ((listp mode-line-process) (format-mode-line mode-line-process)) (t mode-line-process)))
+(defpowerline powerline-process (cond ((symbolp mode-line-process) (symbol-value mode-line-process)) ((listp mode-line-process) (format-mode-line mode-line-process)) (t mode-line-process)))
 
 ;;;***
 
 ;;;### (autoloads (powerline-nano-theme powerline-vim-theme powerline-center-theme
 ;;;;;;  powerline-default-theme) "powerline-themes" "powerline-themes.el"
-;;;;;;  (21003 40439))
+;;;;;;  (21034 32439))
 ;;; Generated autoloads from powerline-themes.el
 
 (autoload 'powerline-default-theme "powerline-themes" "\
@@ -82,7 +82,7 @@ Setup a nano-like mode-line.
 ;;;***
 
 ;;;### (autoloads nil nil ("powerline-pkg.el" "powerline-separators.el")
-;;;;;;  (21003 40439 928585))
+;;;;;;  (21034 32439 769171))
 
 ;;;***
 

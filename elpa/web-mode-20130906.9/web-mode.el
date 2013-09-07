@@ -2,7 +2,7 @@
 
 ;; Copyright 2011-2013 François-Xavier Bois
 
-;; Version: 6.0.43
+;; Version: 6.0.46
 ;; Author: François-Xavier Bois <fxbois AT Google Mail Service>
 ;; Maintainer: François-Xavier Bois
 ;; Created: July 2011
@@ -35,7 +35,6 @@
 
 ;; Code goes here
 
-;;todo : invalidation css doit être plus efficace
 ;;todo : reduction des css rules div { ... }
 ;;todo : passer les content-types en symboles
 ;;todo : tester shortcut A -> pour pomme
@@ -47,7 +46,7 @@
   "Major mode for editing web templates:
    HTML files embedding parts (CSS/JavaScript)
    and blocks (PHP, Erb, Django/Twig, Smarty, JSP, ASP, etc.)."
-  :version "6.0.43"
+  :version "6.0.46"
   :group 'languages)
 
 (defgroup web-mode-faces nil
@@ -1046,7 +1045,6 @@ Must be used in conjunction with web-mode-enable-block-face."
    '("<%\\$\\|%>" 0 'web-mode-preprocessor-face)
    '("[[:alpha:]_]" 0 'web-mode-variable-name-face)
    ))
-
 
 (defvar web-mode-selector-font-lock-keywords
   (list
@@ -4445,10 +4443,13 @@ Must be used in conjunction with web-mode-enable-block-face."
 (defun web-mode-comment-or-uncomment (&optional pos)
   "Comment or uncomment line(s), block or region at POS."
   (interactive)
-  (unless pos (setq pos (if mark-active (region-beginning) (point))))
-  (if (web-mode-is-comment)
-      (web-mode-uncomment pos)
-    (web-mode-comment pos))
+  (save-excursion
+    (unless pos (setq pos (if mark-active (region-beginning) (point))))
+    (goto-char pos)
+    (skip-chars-forward "[:space:]" (line-end-position))
+    (if (web-mode-is-comment)
+	(web-mode-uncomment (point))
+      (web-mode-comment (point))))
   (web-mode-scan-region (point-min) (point-max)))
 
 (defun web-mode-comment (pos)
@@ -5656,7 +5657,6 @@ Must be used in conjunction with web-mode-enable-block-face."
       );if narrowed
     ))
 
-;; todo : il faut indentifier les blocks de la région
 (defun web-mode-invalidate-css-region (pos-beg pos-end)
   "Invalidate css region (only when one char has been inserted)"
   (save-excursion
