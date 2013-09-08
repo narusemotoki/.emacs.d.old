@@ -100,3 +100,22 @@
                 (when (and (not (file-exists-p dir))
                            (y-or-n-p (format "Directory %s does not exist. Create it?" dir)))
                   (make-directory dir t))))))
+
+; diredを便利にする
+(require 'dired-x)
+
+; diredから"r"でファイル名をインライン編集する
+(require 'wdired)
+(define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
+
+; gzファイルも編集できるようにする
+(auto-compression-mode t)
+
+(define-key global-map (kbd "C-c g") 'rgrep)
+
+; 関数名を画面上部に表示する
+(which-function-mode 1)
+
+; スペルチェック
+(setq-default flyspell-mode t)
+(setq ispell-dictionary "american")
