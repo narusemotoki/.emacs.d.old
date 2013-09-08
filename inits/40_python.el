@@ -14,8 +14,10 @@
 
 (add-hook 'python-mode-hook
     '(lambda ()
-        ; インデントを考えてくれる
-        (define-key (current-local-map) "\C-h" 'python-backspace)
+       ; インデントを考えてくれる
+       (define-key (current-local-map) "\C-h" 'python-backspace)
+       ; pep8
+       (define-key (current-local-map) "\C-c8" 'pep8)
     ))
 
 
@@ -38,3 +40,4 @@
       ad-do-it))))
 
 (ad-activate 'python-calculate-indentation)
+
