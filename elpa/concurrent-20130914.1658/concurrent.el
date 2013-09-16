@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010, 2011, 2012  SAKURAI Masashi
 
 ;; Author: SAKURAI Masashi <m.sakurai at kiwanami.net>
-;; Version: 20120306.1807
+;; Version: 20130914.1658
 ;; X-Original-Version: 0.3.1
 ;; Keywords: deferred, async, concurrent
 ;; Package-Requires: ((deferred "0.3.1"))
@@ -33,8 +33,7 @@
 ;; - Dataflow
 ;; - Signal/Channel
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'deferred)
 
@@ -501,5 +500,10 @@ This function does nothing for the waiting deferred objects."
 
 
 (provide 'concurrent)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
+
 ;;; concurrent.el ends here
 

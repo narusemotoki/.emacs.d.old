@@ -1376,15 +1376,12 @@ server if necessary."
 
 (defun magit-use-emacsclient-p ()
   (and magit-emacsclient-executable
-       (cl-find-if #'display-graphic-p (terminal-list))
        (not (and (fboundp 'tramp-tramp-file-p)
                  (tramp-tramp-file-p default-directory)))))
 
 (defun magit-assert-emacsclient (action)
   (unless magit-emacsclient-executable
     (error "Cannot %s when `magit-emacsclient-executable' is nil" action))
-  (unless (cl-find-if #'display-graphic-p (terminal-list))
-    (error "Cannot %s when no window system is available" action))
   (when (and (fboundp 'tramp-tramp-file-p)
              (tramp-tramp-file-p default-directory))
     (error "Cannot %s when accessing repository using tramp" action)))
@@ -1632,7 +1629,7 @@ Otherwise, return nil."
   (magit-get-remote (magit-get-current-branch)))
 
 (defun magit-ref-exists-p (ref)
-  (magit-git-success "show-ref" "--verify" ref) 0)
+  (magit-git-success "show-ref" "--verify" ref))
 
 (defun magit-rev-parse (ref)
   "Return the SHA hash for REF."
@@ -5158,7 +5155,8 @@ Return nil if there is no rebase in progress."
         (cl-case (read-event)
           ((?A ?a) (magit-run-git-async "rebase" "--abort"))
           ((?S ?s) (magit-run-git-async "rebase" "--skip"))
-          ((?C ?c) (magit-run-git-async "rebase" "--continue"))))
+          ((?C ?c) (magit-with-emacsclient magit-server-window-for-commit
+                     (magit-run-git-async "rebase" "--continue")))))
     (let* ((branch (magit-get-current-branch))
            (rev (magit-read-rev
                  "Rebase to"
@@ -5570,88 +5568,95 @@ With a prefix argument amend to the commit at HEAD instead.
     (magit-commit-internal "commit" magit-custom-options)))
 
 (defun magit-commit-internal (subcmd args)
+  (setq git-commit-previous-winconf (current-window-configuration))
   (if (magit-use-emacsclient-p)
       (magit-with-emacsclient magit-server-window-for-commit
         (apply 'magit-run-git-async subcmd args))
-    (let ((topdir (magit-get-top-dir)))
-      (with-current-buffer
-          (find-file-noselect
-           (magit-git-dir (if (equal subcmd "tag")
-                              "TAG_EDITMSG"
-                            "COMMIT_EDITMSG")))
+    (let ((topdir (magit-get-top-dir))
+          (editmsg (magit-git-dir (if (equal subcmd "tag")
+                                      "TAG_EDITMSG"
+                                    "COMMIT_EDITMSG"))))
+      (with-current-buffer (find-file-noselect editmsg)
         (funcall (if (functionp magit-server-window-for-commit)
                      magit-server-window-for-commit
                    'switch-to-buffer)
                  (current-buffer))
         (add-hook 'git-commit-commit-hook
                   (apply-partially
-                   (lambda (default-directory args)
-                     (magit-run-git* args))
-                   topdir `(,subcmd
-                            ,"--cleanup=strip"
-                            ,(concat "--file=" (file-relative-name
-                                                (buffer-file-name)
-                                                topdir))
-                            ,@args))
+                   (lambda (default-directory editmsg args)
+                     (apply 'magit-run-git args)
+                     (ignore-errors (delete-file editmsg)))
+                   topdir editmsg
+                   `(,subcmd
+                     ,"--cleanup=strip"
+                     ,(concat "--file=" (file-relative-name
+                                         (buffer-file-name)
+                                         topdir))
+                     ,@args))
                   nil t)))))
 
 (defun magit-commit-add-log ()
   "Add a template for the current hunk to the commit message buffer."
   (interactive)
-  (let ((section (magit-current-section)))
-    (let ((fun (if (eq (magit-section-type section) 'hunk)
-                   (save-window-excursion
-                     (save-excursion
-                       (magit-visit-item)
-                       (add-log-current-defun)))
-                 nil))
-          (file (magit-diff-item-file
-                 (cl-case (magit-section-type section)
-                   (hunk (magit-hunk-item-diff section))
-                   (diff section)
-                   (t    (error "No change at point")))))
-          (buffer (cl-find-if (lambda (buf)
-                                (with-current-buffer buf
-                                  (derived-mode-p 'git-commit-mode)))
-                              (append (buffer-list (selected-frame))
-                                      (buffer-list)))))
-      (unless buffer
-        (error "No commit message buffer found"))
-      (pop-to-buffer buffer)
-      (goto-char (point-min))
-      (cond ((not (search-forward-regexp
-                   (format "^\\* %s" (regexp-quote file)) nil t))
-             ;; No entry for file, create it.
-             (goto-char (point-max))
-             (insert (format "\n* %s" file))
-             (when fun
-               (insert (format " (%s)" fun)))
-             (insert ": "))
-            (fun
-             ;; found entry for file, look for fun
-             (let ((limit (or (save-excursion
-                                (and (search-forward-regexp "^\\* "
-                                                            nil t)
-                                     (match-beginning 0)))
-                              (point-max))))
-               (cond ((search-forward-regexp (format "(.*\\<%s\\>.*):"
-                                                     (regexp-quote fun))
-                                             limit t)
-                      ;; found it, goto end of current entry
-                      (if (search-forward-regexp "^(" limit t)
-                          (backward-char 2)
-                        (goto-char limit)))
-                     (t
-                      ;; not found, insert new entry
-                      (goto-char limit)
-                      (if (bolp)
-                          (open-line 1)
-                        (newline))
-                      (insert (format "(%s): " fun))))))
-            (t
-             ;; found entry for file, look for beginning  it
-             (when (looking-at ":")
-               (forward-char 2)))))))
+  (let* ((section (magit-current-section))
+         (fun (if (eq (magit-section-type section) 'hunk)
+                  (save-window-excursion
+                    (save-excursion
+                      (magit-visit-item)
+                      (add-log-current-defun)))
+                nil))
+         (file (magit-diff-item-file
+                (cl-case (magit-section-type section)
+                  (hunk (magit-hunk-item-diff section))
+                  (diff section)
+                  (t    (error "No change at point")))))
+         (locate-buffer (lambda ()
+                          (cl-find-if
+                           (lambda (buf)
+                             (with-current-buffer buf
+                               (derived-mode-p 'git-commit-mode)))
+                           (append (buffer-list (selected-frame))
+                                   (buffer-list)))))
+         (buffer (funcall locate-buffer)))
+    (unless buffer
+      (magit-commit)
+      (while (not (setq buffer (funcall locate-buffer)))
+        (sit-for 0.01)))
+    (pop-to-buffer buffer)
+    (goto-char (point-min))
+    (cond ((not (search-forward-regexp
+                 (format "^\\* %s" (regexp-quote file)) nil t))
+           ;; No entry for file, create it.
+           (goto-char (point-max))
+           (insert (format "\n* %s" file))
+           (when fun
+             (insert (format " (%s)" fun)))
+           (insert ": "))
+          (fun
+           ;; found entry for file, look for fun
+           (let ((limit (or (save-excursion
+                              (and (search-forward-regexp "^\\* "
+                                                          nil t)
+                                   (match-beginning 0)))
+                            (point-max))))
+             (cond ((search-forward-regexp (format "(.*\\<%s\\>.*):"
+                                                   (regexp-quote fun))
+                                           limit t)
+                    ;; found it, goto end of current entry
+                    (if (search-forward-regexp "^(" limit t)
+                        (backward-char 2)
+                      (goto-char limit)))
+                   (t
+                    ;; not found, insert new entry
+                    (goto-char limit)
+                    (if (bolp)
+                        (open-line 1)
+                      (newline))
+                    (insert (format "(%s): " fun))))))
+          (t
+           ;; found entry for file, look for beginning  it
+           (when (looking-at ":")
+             (forward-char 2))))))
 
 ;;;; Tagging
 
@@ -5664,7 +5669,8 @@ With a prefix argument annotate the tag.
                                      (or (magit-default-rev) "HEAD"))
                      current-prefix-arg))
   (let ((args (append magit-custom-options (list name rev))))
-    (if (or (member "--annotate" args)
+    (if (or (member "--sign" args)
+            (member "--annotate" args)
             (and annotate (setq args (cons "--annotate" args))))
         (magit-commit-internal "tag" args)
       (apply #'magit-run-git "tag" args))))

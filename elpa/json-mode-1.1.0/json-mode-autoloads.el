@@ -3,7 +3,7 @@
 ;;; Code:
 
 
-;;;### (autoloads (json-mode) "json-mode" "json-mode.el" (20943 43534))
+;;;### (autoloads (json-mode) "json-mode" "json-mode.el" (21046 29628))
 ;;; Generated autoloads from json-mode.el
 
 (autoload 'json-mode "json-mode" "\
@@ -11,9 +11,11 @@ Major mode for editing JSON files
 
 \(fn)" t nil)
 
+(add-to-list 'auto-mode-alist '("\\.json$" . json-mode))
+
 ;;;***
 
-;;;### (autoloads nil nil ("json-mode-pkg.el") (20943 43534 420084))
+;;;### (autoloads nil nil ("json-mode-pkg.el") (21046 29628 824131))
 
 ;;;***
 
