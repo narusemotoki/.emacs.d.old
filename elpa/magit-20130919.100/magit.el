@@ -58,8 +58,6 @@ Use the function by the same name instead of this variable.")
 (when (version< emacs-version "23.2")
   (error "Magit requires at least GNU Emacs 23.2"))
 
-(require 'magit-compat)
-
 (require 'git-commit-mode)
 (require 'git-rebase-mode)
 
@@ -97,6 +95,41 @@ Use the function by the same name instead of this variable.")
 
 (defvar magit-custom-options)
 (defvar package-alist)
+
+(eval-and-compile
+
+  ;; Added in Emacs 24.3.
+  (unless (fboundp 'setq-local)
+    (defmacro setq-local (var val)
+      "Set variable VAR to value VAL in current buffer."
+      (list 'set (list 'make-local-variable (list 'quote var)) val)))
+
+  ;; Added in Emacs 24.3.
+  (unless (fboundp 'defvar-local)
+    (defmacro defvar-local (var val &optional docstring)
+      "Define VAR as a buffer-local variable with default value VAL.
+Like `defvar' but additionally marks the variable as being automatically
+buffer-local wherever it is set."
+      (declare (debug defvar) (doc-string 3))
+      (list 'progn (list 'defvar var val docstring)
+            (list 'make-variable-buffer-local (list 'quote var)))))
+
+  ;; Added in Emacs 23.3.
+  (unless (fboundp 'string-prefix-p)
+    (defun string-prefix-p (str1 str2 &optional ignore-case)
+      "Return non-nil if STR1 is a prefix of STR2.
+If IGNORE-CASE is non-nil, the comparison is done without paying attention
+to case differences."
+      (eq t (compare-strings str1 nil nil
+                             str2 0 (length str1) ignore-case))))
+
+  ;; Added in Emacs 23.3.
+  (unless (fboundp 'string-match-p)
+    (defun string-match-p (regexp string &optional start)
+      "Same as `string-match' but don't change the match data."
+      (let ((inhibit-changing-match-data t))
+        (string-match regexp string start))))
+  )
 
 
 ;;; Options
@@ -323,6 +356,11 @@ Only considered when moving past the last entry with
   :group 'magit
   :type 'boolean)
 
+(defcustom magit-mode-hook nil
+  "Hook run when entering a Magit mode derived mode."
+  :group 'magit
+  :type 'hook)
+
 (defcustom magit-status-insert-sections-hook
   '(magit-insert-status-local-line
     magit-insert-status-remote-line
@@ -353,14 +391,6 @@ similar hooks for other Magit modes."
   :group 'magit
   :type 'hook)
 
-(defcustom magit-status-insert-tags-line nil
-  "Whether to display related tags in the status buffer.
-
-Also see option `magit-status-tags-line-subject' which controls how
-this information is displayed."
-  :group 'magit
-  :type 'boolean)
-
 (defcustom magit-status-tags-line-subject 'head
   "Whether tag or head is the subject on tags line in status buffer.
 
@@ -377,10 +407,7 @@ or objects in these sentences.
         HEAD is *behind* the next tag by N commits.
 
 If the value is `tag' the commit counts are fontified; otherwise
-they are not (due to semantic considerations).
-
-Option `magit-status-insert-tags-line' has to be non-nil for this
-information to be displayed at all."
+they are not (due to semantic considerations)."
   :group 'magit
   :type '(choice (const :tag "tags are the subjects" tag)
                  (const :tag "head is the subject" head)))
@@ -410,15 +437,15 @@ Autocompletion is used by functions like `magit-checkout',
 `magit-interactive-rebase' and others which offer branch name
 completion.
 
-The value 'name-then-remote means remotes will be of the form
-\"branch (remote)\", while the value 'remote-slash-name means that
+The value 'branch-then-remote means remotes will be of the form
+\"branch (remote)\", while the value 'remote-slash-branch means that
 they'll be of the form \"remote/branch\".  I.e. something that's
 listed as \"remotes/upstream/next\" by \"git branch -l -a\" will
 be \"upstream/next\"."
   :group 'magit
-  :version "1.3.0"
   :type '(choice (const :tag "branch (remote)" branch-then-remote)
-                 (const :tag "remote/branch" remote-slash-branch)))
+                 (const :tag "remote/branch" remote-slash-branch))
+  :package-version '(magit . "1.3.0"))
 
 (defcustom magit-process-connection-type (not (eq system-type 'cygwin))
   "Connection type used for the git process.
@@ -704,7 +731,7 @@ set before loading libary `magit'.")
 
 ;; Add to faces group because it affects `magit-item-highlight's
 ;; default, and because the doc-strings of many faces refer to it.
-(custom-add-to-group 'magit-faces 'magit-diff-use-overlays 'custom-group)
+(custom-add-to-group 'magit-faces 'magit-diff-use-overlays 'custom-variable)
 
 (custom-add-to-group 'magit-faces 'git-commit-faces 'custom-group)
 (custom-add-to-group 'magit-faces 'git-rebase-faces 'custom-group)
@@ -2907,14 +2934,13 @@ seconds.  Finally if both PROCESS and BUFFER are nil display the
 buffer of the most recent process, like in the interactive case."
   (interactive)
   (cond ((not process)
-         (unless buffer
-           (setq buffer (get-buffer magit-process-buffer-name))
-           (unless buffer
+         (or buffer
+             (setq buffer (get-buffer magit-process-buffer-name))
              (error "No Git commands have run"))
-           (when (buffer-live-p buffer)
-             (display-buffer buffer)
-             (with-current-buffer buffer
-               (goto-char (point-max))))))
+         (when (buffer-live-p buffer)
+           (display-buffer buffer)
+           (with-current-buffer buffer
+             (goto-char (point-max)))))
         ((= magit-process-popup-time 0)
          (magit-display-process nil (process-buffer process)))
         ((> magit-process-popup-time 0)
@@ -2924,8 +2950,6 @@ buffer of the most recent process, like in the interactive case."
 
 ;;; Magit Mode
 ;;;; Hooks
-
-(defvar magit-mode-hook nil "Hook run by `magit-mode'.")
 
 (put 'magit-mode 'mode-class 'special)
 
@@ -4221,10 +4245,9 @@ must return a string which will represent the log line.")
             magit-log-author-date-overlay)
       (setq magit-log-author-date-string-length max-length))
     (magit-log-refresh-author-date)
-    (when magit-log-author-date-overlay
-      (add-hook 'window-configuration-change-hook
-                'magit-log-refresh-author-date
-                nil t))))
+    (add-hook 'window-configuration-change-hook
+              'magit-log-refresh-author-date
+              nil t)))
 
 (defvar magit-log-buffer-name "*magit-log*"
   "Buffer name for display of log entries.")
@@ -4299,12 +4322,11 @@ must return a string which will represent the log line.")
     t))
 
 (defun magit-wash-log (&optional style)
-  (let ((magit-old-top-section nil))
-    (when (derived-mode-p 'magit-log-mode)
-      (magit-log-setup-author-date))
+  (let ((magit-old-top-section nil)
+        (in-log-mode (derived-mode-p 'magit-log-mode)))
+    (when in-log-mode (magit-log-setup-author-date))
     (magit-wash-sequence (apply-partially 'magit-wash-log-line style))
-    (when (derived-mode-p 'magit-log-mode)
-      (magit-log-create-author-date-overlays))))
+    (when in-log-mode (magit-log-create-author-date-overlays))))
 
 (defun magit-wash-color-log (&optional style)
   (let ((ansi-color-apply-face-function
@@ -4448,7 +4470,7 @@ Noninteractively, if the commit is already displayed and SCROLL
 is provided, call SCROLL's function definition in the commit
 window.  (`scroll-up' and `scroll-down' are typically passed in
 for this argument.)"
-  (interactive (list (magit-read-rev "Show commit (hash or ref)")
+  (interactive (list (magit-read-rev-with-default "Show commit (hash or ref)")
                      nil nil t))
   (when (magit-section-p commit)
     (setq commit (magit-section-info commit)))
@@ -4618,19 +4640,19 @@ in `magit-commit-buffer-name'."
         "nothing committed (yet)")))
 
 (defun magit-insert-status-tags-line ()
-  (when magit-status-insert-tags-line
-    (let* ((current-tag (magit-get-current-tag t))
-           (next-tag (magit-get-next-tag t))
-           (both-tags (and current-tag next-tag t))
-           (tag-subject (eq magit-status-tags-line-subject 'tag)))
-      (when (or current-tag next-tag)
-        (magit-insert-status-line (if both-tags "Tags" "Tag")
-          (concat
-           (and current-tag (apply 'magit-format-status-tag-sentence
-                                   tag-subject current-tag))
-           (and both-tags ", ")
-           (and next-tag (apply 'magit-format-status-tag-sentence
-                                (not tag-subject) next-tag))))))))
+  (let* ((current-tag (magit-get-current-tag t))
+         (next-tag (magit-get-next-tag t))
+         (both-tags (and current-tag next-tag t))
+         (tag-subject (eq magit-status-tags-line-subject 'tag)))
+    (when (or current-tag next-tag)
+      (magit-insert-status-line
+       (if both-tags "Tags" "Tag")
+       (concat
+        (and current-tag (apply 'magit-format-status-tag-sentence
+                                tag-subject current-tag))
+        (and both-tags ", ")
+        (and next-tag (apply 'magit-format-status-tag-sentence
+                             (not tag-subject) next-tag)))))))
 
 (defun magit-format-status-tag-sentence (behindp tag cnt &rest ignored)
   (concat (propertize tag 'face 'magit-tag)
@@ -5274,13 +5296,15 @@ With two prefix args, remove ignored files as well."
   (interactive)
   (magit-section-case (item info)
     ((pending commit)
-     (magit-rewrite-set-commit-property info 'used t))))
+     (magit-rewrite-set-commit-property info 'used t)
+     (magit-refresh))))
 
 (defun magit-rewrite-set-unused ()
   (interactive)
   (magit-section-case (item info)
     ((pending commit)
-     (magit-rewrite-set-commit-property info 'used nil))))
+     (magit-rewrite-set-commit-property info 'used nil)
+     (magit-refresh))))
 
 (magit-define-inserter pending-changes ()
   (let* ((info (magit-read-rewrite-info))
@@ -6311,7 +6335,7 @@ except if LOCAL is non-nil in which case they are written to
       (write-region nil nil ignore-file))
     (magit-need-refresh)))
 
-(defun magit-ignore-item (edit local)
+(defun magit-ignore-item (edit &optional local)
   "Ignore the item at point.
 With a prefix argument edit the ignore string."
   (interactive "P")
@@ -6550,7 +6574,7 @@ With a prefix argument, visit in other window."
     (magit-section-action (item info "mark")
       ((commit)
        (setq magit-marked-commit
-             (if (eq magit-marked-commit info) nil info)))))
+             (if (equal magit-marked-commit info) nil info)))))
   (magit-refresh-marked-commits))
 
 ;;;; Describe
@@ -6881,7 +6905,7 @@ These are the branch names with the remote name stripped."
     (unless (string= (or new-tracked "") "")
       (cond (;; Match refs that are unknown in the local repository if
              ;; `magit-remote-ref-format' is set to
-             ;; `name-then-remote'. Can be useful if you want to
+             ;; `branch-then-remote'. Can be useful if you want to
              ;; create a new branch in a remote repository.
              (string-match "^\\([^ ]+\\) +(\\(.+\\))$" ; 1: branch name; 2: remote name
                            new-tracked)
