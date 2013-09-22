@@ -3,7 +3,7 @@
 ;;; Code:
 
 
-;;;### (autoloads (magit-status) "magit" "magit.el" (21050 53916))
+;;;### (autoloads (magit-status) "magit" "magit.el" (21054 33935))
 ;;; Generated autoloads from magit.el
 
 (autoload 'magit-status "magit" "\
@@ -21,7 +21,7 @@ when asking for user input.
 ;;;***
 
 ;;;### (autoloads (magit-blame-mode) "magit-blame" "magit-blame.el"
-;;;;;;  (21050 53916))
+;;;;;;  (21054 33935))
 ;;; Generated autoloads from magit-blame.el
 
 (autoload 'magit-blame-mode "magit-blame" "\
@@ -32,7 +32,7 @@ Display blame information inline.
 ;;;***
 
 ;;;### (autoloads (global-magit-wip-save-mode magit-wip-save-mode
-;;;;;;  magit-wip-mode) "magit-wip" "magit-wip.el" (21050 53916))
+;;;;;;  magit-wip-mode) "magit-wip" "magit-wip.el" (21054 33935))
 ;;; Generated autoloads from magit-wip.el
 
 (defvar magit-wip-mode nil "\
@@ -82,7 +82,7 @@ See `magit-wip-save-mode' for more information on Magit-Wip-Save mode.
 ;;;***
 
 ;;;### (autoloads nil nil ("magit-bisect.el" "magit-cherry.el" "magit-key-mode.el"
-;;;;;;  "magit-pkg.el") (21050 53916 61845))
+;;;;;;  "magit-pkg.el") (21054 33935 277013))
 
 ;;;***
 

@@ -900,15 +900,23 @@ if SRC is omitted, use current source."
 
 (defun* helm-attrset (attribute-name value
                                      &optional
-                                     (src (helm-get-current-source)))
+                                     (src (helm-get-current-source))
+                                     alter-type)
   "Set the value of ATTRIBUTE-NAME of source SRC to VALUE.
 If ATTRIBUTE-NAME doesn't exists in source it is created with value VALUE.
-If SRC is omitted, use current source."
-  (helm-aif (or (assq attribute-name src)
-                (helm-get-attribute-from-source-type attribute-name src))
-      (setcdr it value)
-    (setcdr src (cons (cons attribute-name value) (cdr src))))
-  value)
+If ALTER-TYPE is non--nil alter the value of ATTRIBUTE-NAME in `helm-attributes'
+if it exists. 
+If SRC is omitted, use current source.
+If operation succeed, return value, otherwise nil."
+  (let ((from-type (helm-get-attribute-from-source-type attribute-name src))
+        done)
+    (helm-aif (or (assq attribute-name src)
+                  (and alter-type from-type))
+        (prog1 (setcdr it value) (setq done t))
+      (unless from-type
+        (setcdr src (cons (cons attribute-name value) (cdr src)))
+        (setq done t)))
+  (and done value)))
 
 (defun helm-get-attribute-from-source-type (attribute source)
   "Get ATTRIBUTE from type attribute of SOURCE."
@@ -935,13 +943,13 @@ arg TYPE is an existing type defined in `helm-type-attributes'."
 
 (defun helm-append-at-nth (seq elm index)
   "Append ELM at INDEX in SEQ."
-  (loop for i in seq
-        for len = (length seq)
-        when (> index len) do (setq index len)
-        for count from 1 collect i
-        when (= count index)
-        if (listp elm) append elm
-        else collect elm))
+  (let ((len (length seq)))
+    (when (> index len) (setq index len))
+    (loop for i in seq
+          for count from 1 collect i
+          when (= count index)
+          if (listp elm) append elm
+          else collect elm)))
 
 (defun helm-add-action-to-source (name fn source &optional index)
   "Add new action NAME linked to function FN to SOURCE.

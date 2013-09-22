@@ -95,6 +95,7 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function org-reverse-string "org" (string))
+(declare-function org-element-context "org-element" (&optional ELEMENT))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -478,8 +479,7 @@ specific header arguments as well.")
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
-    (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no")
-    (:padnewline . "yes"))
+    (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
