@@ -113,8 +113,8 @@
 
 (define-key global-map (kbd "C-c g") 'rgrep)
 
-; 関数名を画面上部に表示する
-(which-function-mode 1)
+; 関数名を表示する
+;(which-function-mode 1)
 
 ; スペルチェック
 (setq-default flyspell-mode t)
