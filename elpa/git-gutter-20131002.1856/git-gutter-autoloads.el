@@ -5,8 +5,8 @@
 
 ;;;### (autoloads (git-gutter:toggle git-gutter:clear git-gutter
 ;;;;;;  git-gutter:previous-hunk git-gutter:next-hunk git-gutter:popup-hunk
-;;;;;;  git-gutter:revert-hunk global-git-gutter-mode git-gutter-mode)
-;;;;;;  "git-gutter" "git-gutter.el" (21066 56515))
+;;;;;;  git-gutter:stage-hunk git-gutter:revert-hunk global-git-gutter-mode
+;;;;;;  git-gutter-mode) "git-gutter" "git-gutter.el" (21071 43175))
 ;;; Generated autoloads from git-gutter.el
 
 (autoload 'git-gutter-mode "git-gutter" "\
@@ -37,6 +37,11 @@ See `git-gutter-mode' for more information on Git-Gutter mode.
 
 (autoload 'git-gutter:revert-hunk "git-gutter" "\
 Revert current hunk.
+
+\(fn)" t nil)
+
+(autoload 'git-gutter:stage-hunk "git-gutter" "\
+Stage this hunk like 'git add -p'
 
 \(fn)" t nil)
 
@@ -72,7 +77,7 @@ toggle to show diff information
 
 ;;;***
 
-;;;### (autoloads nil nil ("git-gutter-pkg.el") (21066 56515 291676))
+;;;### (autoloads nil nil ("git-gutter-pkg.el") (21071 43175 877465))
 
 ;;;***
 

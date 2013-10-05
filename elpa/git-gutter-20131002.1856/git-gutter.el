@@ -4,8 +4,8 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-git-gutter
-;; Version: 20131001.26
-;; X-Original-Version: 0.51
+;; Version: 20131002.1856
+;; X-Original-Version: 0.52
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -476,6 +476,9 @@ character for signs of changes"
         (modified (git-gutter:delete-added-lines start-line end-line)
                   (git-gutter:insert-deleted-lines content))))))
 
+(defsubst git-gutter:popup-buffer-window ()
+  (get-buffer-window (get-buffer git-gutter:popup-buffer)))
+
 ;;;###autoload
 (defun git-gutter:revert-hunk ()
   "Revert current hunk."
@@ -486,7 +489,45 @@ character for signs of changes"
       (when (yes-or-no-p "Revert current hunk ?")
         (git-gutter:do-revert-hunk it)
         (save-buffer))
-      (delete-window (get-buffer-window (get-buffer git-gutter:popup-buffer))))))
+      (delete-window (git-gutter:popup-buffer-window)))))
+
+(defun git-gutter:current-file-path ()
+  (let ((file (or git-gutter:base-file-name (git-gutter:base-file))))
+    (git-gutter:file-path default-directory file)))
+
+(defun git-gutter:diff-header-index-info (path)
+  (with-temp-buffer
+    (let ((cmd (format "git diff %s" path)))
+      (when (zerop (git-gutter:execute-command cmd path))
+        (goto-char (point-min))
+        (forward-line 4)
+        (buffer-substring-no-properties (point-min) (point))))))
+
+(defun git-gutter:hunk-diff-header ()
+  (git-gutter:awhen (git-gutter:current-file-path)
+    (git-gutter:diff-header-index-info it)))
+
+(defun git-gutter:do-stage-hunk (diff-info)
+  (let ((content (plist-get diff-info :content))
+        (header (git-gutter:hunk-diff-header))
+        (patch (make-temp-name "git-gutter")))
+    (when header
+      (with-temp-file patch
+        (insert header)
+        (insert content)
+        (insert "\n"))
+      (let ((cmd (concat "git apply --unidiff-zero --cached " patch)))
+        (unless (zerop (call-process-shell-command cmd))
+          (message "Failed: %s" cmd))
+        (delete-file patch)))))
+
+;;;###autoload
+(defun git-gutter:stage-hunk ()
+  "Stage this hunk like 'git add -p'"
+  (interactive)
+  (git-gutter:awhen (git-gutter:search-here-diffinfo git-gutter:diffinfos)
+    (git-gutter:do-stage-hunk it)
+    (git-gutter)))
 
 ;;;###autoload
 (defun git-gutter:popup-hunk (&optional diffinfo)

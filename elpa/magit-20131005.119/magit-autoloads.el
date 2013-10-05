@@ -5,14 +5,14 @@
 
 ;;;### (autoloads (magit-run-gitk magit-run-git-gui-blame magit-run-git-gui
 ;;;;;;  magit-show magit-show-file-revision magit-init magit-add-change-log-entry-other-window
-;;;;;;  magit-add-change-log-entry-no-option magit-wazzup magit-save-index
+;;;;;;  magit-add-change-log-entry magit-wazzup magit-save-index
 ;;;;;;  magit-submodule-sync magit-submodule-init magit-submodule-update-init
 ;;;;;;  magit-submodule-update magit-commit magit-git-command magit-shell-command
 ;;;;;;  magit-interactive-rebase magit-rename-remote magit-remove-remote
 ;;;;;;  magit-add-remote magit-rename-branch magit-delete-branch
 ;;;;;;  magit-unstage-all magit-stage-all magit-merge-abort magit-merge
-;;;;;;  magit-status magit-show-commit) "magit" "magit.el" (21066
-;;;;;;  56503))
+;;;;;;  magit-status magit-show-commit) "magit" "magit.el" (21071
+;;;;;;  43162))
 ;;; Generated autoloads from magit.el
 
 (autoload 'magit-show-commit "magit" "\
@@ -173,6 +173,7 @@ Synchronizes submodule's remote URL configuration.
  (autoload 'magit-file-log "magit")
  (autoload 'magit-reflog "magit")
  (autoload 'magit-reflog-head "magit")
+ (autoload 'magit-cherry "magit")
 
 (autoload 'magit-save-index "magit" "\
 Add the content of current file as if it was the index.
@@ -186,18 +187,18 @@ Add the content of current file as if it was the index.
 
 \(fn &optional ALL)" t nil)
 
-(autoload 'magit-add-change-log-entry-no-option "magit" "\
-Add a change log entry for current change.
-With a prefix argument, edit in other window.
-The name of the change log file is set by
-variable change-log-default-name.
+(autoload 'magit-add-change-log-entry "magit" "\
+Find change log file and add date entry and item for current change.
+This differs from `add-change-log-entry' (which see) in that
+it acts on the current hunk in a Magit buffer instead of on
+a position in a file-visiting buffer.
 
-\(fn &optional OTHER-WINDOW)" t nil)
+\(fn &optional WHOAMI FILE-NAME OTHER-WINDOW)" t nil)
 
 (autoload 'magit-add-change-log-entry-other-window "magit" "\
 
 
-\(fn)" t nil)
+\(fn &optional WHOAMI FILE-NAME)" t nil)
  (autoload 'magit-branch-manager "magit")
 
 (autoload 'magit-init "magit" "\
@@ -251,8 +252,8 @@ Run `gitk --all' for the current git repository.
 
 ;;;### (autoloads (magit-bisect-run magit-bisect-visualize magit-bisect-log
 ;;;;;;  magit-bisect-skip magit-bisect-bad magit-bisect-good magit-bisect-reset
-;;;;;;  magit-bisect-start) "magit-bisect" "magit-bisect.el" (21066
-;;;;;;  56503))
+;;;;;;  magit-bisect-start) "magit-bisect" "magit-bisect.el" (21071
+;;;;;;  43162))
 ;;; Generated autoloads from magit-bisect.el
 
 (autoload 'magit-bisect-start "magit-bisect" "\
@@ -298,7 +299,7 @@ Bisect automatically by running commands after each step.
 ;;;***
 
 ;;;### (autoloads (magit-blame-mode) "magit-blame" "magit-blame.el"
-;;;;;;  (21066 56503))
+;;;;;;  (21071 43162))
 ;;; Generated autoloads from magit-blame.el
 
 (autoload 'magit-blame-mode "magit-blame" "\
@@ -308,14 +309,8 @@ Display blame information inline.
 
 ;;;***
 
-;;;### (autoloads nil "magit-cherry" "magit-cherry.el" (21066 56503))
-;;; Generated autoloads from magit-cherry.el
- (autoload 'magit-cherry "magit")
-
-;;;***
-
 ;;;### (autoloads (global-magit-wip-save-mode magit-wip-save-mode
-;;;;;;  magit-wip-mode) "magit-wip" "magit-wip.el" (21066 56503))
+;;;;;;  magit-wip-mode) "magit-wip" "magit-wip.el" (21071 43162))
 ;;; Generated autoloads from magit-wip.el
 
 (defvar magit-wip-mode nil "\
@@ -364,8 +359,8 @@ See `magit-wip-save-mode' for more information on Magit-Wip-Save mode.
 
 ;;;***
 
-;;;### (autoloads nil nil ("magit-key-mode.el" "magit-pkg.el") (21066
-;;;;;;  56503 130288))
+;;;### (autoloads nil nil ("magit-key-mode.el" "magit-pkg.el") (21071
+;;;;;;  43162 810004))
 
 ;;;***
 
