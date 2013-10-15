@@ -8,4 +8,6 @@
 
 (setq mc/cmds-to-run-once
       '(
+        c-electric-delete-forward
+        toggle-input-method
         ))
