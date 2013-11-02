@@ -6,7 +6,7 @@
 ;; Authors: Sebastian Wiesner <lunaryorn@gmail.com>
 ;;	Florian Ragwitz <rafl@debian.org>
 ;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
-;; Version: 20131029.1425
+;; Version: 20131031.1351
 ;; X-Original-Version: 0.14.0
 ;; Homepage: https://github.com/magit/git-modes
 ;; Keywords: convenience vc git
@@ -29,19 +29,6 @@
 ;;; Commentary:
 
 ;; A major mode for editing Git commit messages.
-
-;;;; Activation
-
-;; The variable `auto-mode-alist' has to be explicitly extended, by
-;; adding this to your init file.
-;;
-;;    (require 'git-commit-mode)    ; unless autoloaded
-;;    (git-commit-auto-mode-enable)
-;;
-;; Loading `magit' takes care of this, so if you use that, you can
-;; skip the above.  Unless you also have `magit-log-edit' installed,
-;; in which case `magit' assumes you want to use that instead of this
-;; library.
 
 ;;;; Formatting
 
@@ -644,18 +631,15 @@ basic structure of and errors in git commit messages."
   '(put 'git-commit-mode 'flyspell-mode-predicate
         'git-commit-mode-flyspell-verify))
 
-(defvar git-commit-auto-mode-regexps
-  '("/COMMIT_EDITMSG\\'"    "/TAG_EDITMSG\\'"
-    "/PULLREQ_EDITMSG\\'" "/NOTES_EDITMSG\\'" "/MERGE_MSG\\'"))
+;;;###autoload
+(dolist (pattern '("/COMMIT_EDITMSG\\'" "/NOTES_EDITMSG\\'"
+                   "/MERGE_MSG\\'" "/TAG_EDITMSG\\'"
+                   "/PULLREQ_EDITMSG\\'"))
+  (add-to-list 'auto-mode-alist (cons pattern 'git-commit-mode)))
 
 (defun git-commit-auto-mode-enable ()
-  (dolist (p git-commit-auto-mode-regexps)
-    (add-to-list 'auto-mode-alist (cons p 'git-commit-mode))))
-
-(defun git-commit-auto-mode-disable ()
-  (dolist (p git-commit-auto-mode-regexps)
-    (setq auto-mode-alist
-          (delete (cons p 'git-commit-mode) 'auto-mode-alist))))
+  (message "git-commit-auto-mode-enable is obsolete and doesn't do anything"))
+(make-obsolete 'git-commit-auto-mode-enable "This mode is a noop now" "")
 
 (provide 'git-commit-mode)
 ;; Local Variables:
