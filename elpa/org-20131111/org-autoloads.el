@@ -9,7 +9,7 @@
 ;;;;;;  org-run-like-in-org-mode turn-on-orgstruct++ turn-on-orgstruct
 ;;;;;;  orgstruct-mode org-global-cycle org-cycle org-mode org-clock-persistence-insinuate
 ;;;;;;  turn-on-orgtbl org-version org-babel-load-file org-babel-do-load-languages)
-;;;;;;  "org" "org.el" (21119 38445 72394 315000))
+;;;;;;  "org" "org.el" (21122 12247 533963 23000))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -235,7 +235,7 @@ Call the customize function with org as argument.
 ;;;;;;  org-search-view org-agenda-list org-batch-store-agenda-views
 ;;;;;;  org-store-agenda-views org-batch-agenda-csv org-batch-agenda
 ;;;;;;  org-agenda org-toggle-sticky-agenda) "org-agenda" "org-agenda.el"
-;;;;;;  (21119 38444 960394 319000))
+;;;;;;  (21122 12247 425963 27000))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -496,8 +496,8 @@ to override `appt-message-warning-time'.
 ;;;***
 
 ;;;### (autoloads (org-capture-import-remember-templates org-capture
-;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21119
-;;;;;;  38445 36394 316000))
+;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21122
+;;;;;;  12247 497963 24000))
 ;;; Generated autoloads from org-capture.el
 
 (autoload 'org-capture-string "org-capture" "\
@@ -540,8 +540,8 @@ Set `org-capture-templates' to be similar to `org-remember-templates'.
 ;;;***
 
 ;;;### (autoloads (org-agenda-columns org-insert-columns-dblock org-dblock-write:columnview
-;;;;;;  org-columns) "org-colview" "org-colview.el" (21119 38444
-;;;;;;  936394 320000))
+;;;;;;  org-columns) "org-colview" "org-colview.el" (21122 12247
+;;;;;;  393963 28000))
 ;;; Generated autoloads from org-colview.el
 
 (autoload 'org-columns "org-colview" "\
@@ -585,7 +585,7 @@ Turn on or update column view in the agenda.
 ;;;***
 
 ;;;### (autoloads (org-check-version) "org-compat" "org-compat.el"
-;;;;;;  (21119 38444 892394 321000))
+;;;;;;  (21122 12247 353963 30000))
 ;;; Generated autoloads from org-compat.el
 
 (autoload 'org-check-version "org-compat" "\
@@ -596,7 +596,7 @@ Try very hard to provide sensible version strings.
 ;;;***
 
 ;;;### (autoloads (org-load-noerror-mustsuffix) "org-macs" "org-macs.el"
-;;;;;;  (21119 38444 980394 318000))
+;;;;;;  (21122 12247 445963 26000))
 ;;; Generated autoloads from org-macs.el
 
 (autoload 'org-load-noerror-mustsuffix "org-macs" "\
@@ -607,7 +607,7 @@ Load FILE with optional arguments NOERROR and MUSTSUFFIX.  Drop the MUSTSUFFIX a
 ;;;***
 
 ;;;### (autoloads (org-git-version org-release) "org-version" "org-version.el"
-;;;;;;  (21119 38445 48394 316000))
+;;;;;;  (21122 12247 509963 24000))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -650,7 +650,7 @@ The location of ODT styles.")
 ;;;;;;  "org-table.el" "org-timer.el" "org-w3m.el" "ox-ascii.el"
 ;;;;;;  "ox-beamer.el" "ox-html.el" "ox-icalendar.el" "ox-latex.el"
 ;;;;;;  "ox-man.el" "ox-md.el" "ox-odt.el" "ox-org.el" "ox-publish.el"
-;;;;;;  "ox-texinfo.el" "ox.el") (21119 38445 148922 668000))
+;;;;;;  "ox-texinfo.el" "ox.el") (21122 12247 612282 335000))
 
 ;;;***
 

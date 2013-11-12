@@ -291,7 +291,7 @@ used to limit the exported source code blocks by language.
 ;;;;;;  org-search-view org-agenda-list org-batch-store-agenda-views
 ;;;;;;  org-store-agenda-views org-batch-agenda-csv org-batch-agenda
 ;;;;;;  org-agenda org-toggle-sticky-agenda) "org-agenda" "org-agenda.el"
-;;;;;;  (21116 41969))
+;;;;;;  (21119 9050))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -839,7 +839,7 @@ tree can be found.
 ;;;***
 
 ;;;### (autoloads (org-element-context org-element-at-point org-element-interpret-data)
-;;;;;;  "org-element" "org-element.el" "4cfa4decd3c5204bc2488f38ecc2a836")
+;;;;;;  "org-element" "org-element.el" "42a311969f9a6740f0212bc9d06ff408")
 ;;; Generated autoloads from org-element.el
 
 (autoload 'org-element-interpret-data "org-element" "\
@@ -1764,7 +1764,7 @@ replace any running timer.
 ;;;***
 
 ;;;### (autoloads (org-git-version org-release) "org-version" "org-version.el"
-;;;;;;  (21116 42043))
+;;;;;;  (21120 29305))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -1790,7 +1790,7 @@ The location of ODT styles.")
 ;;;;;;  org-run-like-in-org-mode turn-on-orgstruct++ turn-on-orgstruct
 ;;;;;;  orgstruct-mode org-global-cycle org-cycle org-mode org-clock-persistence-insinuate
 ;;;;;;  turn-on-orgtbl org-version org-babel-load-file org-babel-do-load-languages)
-;;;;;;  "org" "org.el" (21116 41969))
+;;;;;;  "org" "org.el" (21119 9051))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -2013,7 +2013,7 @@ Call the customize function with org as argument.
 
 ;;;### (autoloads (org-export-dispatch org-export-to-file org-export-to-buffer
 ;;;;;;  org-export-insert-default-template org-export-replace-region-by
-;;;;;;  org-export-string-as org-export-as) "ox" "ox.el" "24db11a7a37a62e66f2951e4522c089a")
+;;;;;;  org-export-string-as org-export-as) "ox" "ox.el" "fe6b9ba224049ad72a51d09d9c633727")
 ;;; Generated autoloads from ox.el
 
 (autoload 'org-export-as "ox" "\
@@ -2983,7 +2983,7 @@ this command to convert it.
 
 ;;;### (autoloads (org-export-dispatch org-export-to-file org-export-to-buffer
 ;;;;;;  org-export-insert-default-template org-export-replace-region-by
-;;;;;;  org-export-string-as org-export-as) "ox" "ox.el" "d882f921718c9ae82423482ddb6b212b")
+;;;;;;  org-export-string-as org-export-as) "ox" "ox.el" "477cc08bdce8f5a1b6589682484a73dc")
 ;;; Generated autoloads from ox.el
 
 (autoload 'org-export-as "ox" "\
