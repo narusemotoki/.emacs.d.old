@@ -119,3 +119,6 @@
 ; スペルチェック
 (setq-default flyspell-mode t)
 (setq ispell-dictionary "american")
+
+; ESC連打でウィンドウがひとつになるのを防ぐ
+(global-set-key (kbd "M-ESC ESC") 'keyboard-quit)
