@@ -1,7 +1,6 @@
 ; 画面を三分割する
 ; http://d.hatena.ne.jp/yascentur/20110621/1308585547
 (defun split-window-vertically-n (num_wins)
-  (interactive "p")
   (if (= num_wins 2)
       (split-window-vertically)
     (progn
@@ -9,7 +8,6 @@
        (- (window-height) (/ (window-height) num_wins)))
       (split-window-vertically-n (- num_wins 1)))))
 (defun split-window-horizontally-n (num_wins)
-  (interactive "p")
   (if (= num_wins 2)
       (split-window-horizontally)
     (progn
