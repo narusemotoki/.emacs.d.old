@@ -21,3 +21,14 @@
   (shell-command
    (format "python -c \"import pynotify;pynotify.init('emacs-olion-notice');pynotify.Notification('%s', '%s', 'dialog-information').show()\"" title message))
 )
+
+; フルスクリーンのトグル
+; http://www.emacswiki.org/emacs/FullScreen#toc17
+(defun toggle-fullscreen ()
+  "Toggle full screen on X11 or OSX"
+  (interactive)
+  (when (or (eq window-system 'x) (eq window-system 'ns))
+    (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullboth))))
+(global-set-key [f11] 'toggle-fullscreen)
