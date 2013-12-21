@@ -50,6 +50,9 @@
 (eval-when-compile (require 'cl))
 
 (setq multi-term-program shell-file-name)
+
+(custom-set-faces
+ '(term-color-blue ((t (:background "dodger blue" :foreground "dodger blue")))))
 (lexical-let
     ((emacs24.3
       [term term-color-black
@@ -66,7 +69,7 @@
        "DeepSkyBlue" ; directory
        "magenta1" "cyan3" "white"]))
   (setq ansi-term-color-vector
-        (if (version< "24.3.5" emacs-version)
+        (if (version< "24.3" emacs-version)
             emacs24.3
           old-emacs)))
 
