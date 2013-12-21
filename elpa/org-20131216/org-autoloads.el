@@ -9,7 +9,7 @@
 ;;;;;;  org-run-like-in-org-mode turn-on-orgstruct++ turn-on-orgstruct
 ;;;;;;  orgstruct-mode org-global-cycle org-cycle org-mode org-clock-persistence-insinuate
 ;;;;;;  turn-on-orgtbl org-version org-babel-load-file org-babel-do-load-languages)
-;;;;;;  "org" "org.el" (21158 46783))
+;;;;;;  "org" "org.el" (21173 8283 431856 896000))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -236,7 +236,7 @@ Call the customize function with org as argument.
 ;;;;;;  org-search-view org-agenda-list org-batch-store-agenda-views
 ;;;;;;  org-store-agenda-views org-batch-agenda-csv org-batch-agenda
 ;;;;;;  org-agenda org-toggle-sticky-agenda) "org-agenda" "org-agenda.el"
-;;;;;;  (21158 46783))
+;;;;;;  (21173 8283 195856 905000))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -289,7 +289,7 @@ longer string it is used as a tags/todo match string.
 Parameters are alternating variable names and values that will be bound
 before running the agenda command.
 
-\(fn CMD-KEY &rest PARAMETERS)" nil (quote macro))
+\(fn CMD-KEY &rest PARAMETERS)" nil t)
 
 (autoload 'org-batch-agenda-csv "org-agenda" "\
 Run an agenda command in batch mode and send the result to STDOUT.
@@ -326,7 +326,7 @@ priority-l   The priority letter if any was given
 priority-n   The computed numerical priority
 agenda-day   The day in the agenda where this is listed
 
-\(fn CMD-KEY &rest PARAMETERS)" nil (quote macro))
+\(fn CMD-KEY &rest PARAMETERS)" nil t)
 
 (autoload 'org-store-agenda-views "org-agenda" "\
 Store agenda views.
@@ -336,7 +336,7 @@ Store agenda views.
 (autoload 'org-batch-store-agenda-views "org-agenda" "\
 Run all custom agenda commands that have a file argument.
 
-\(fn &rest PARAMETERS)" nil (quote macro))
+\(fn &rest PARAMETERS)" nil t)
 
 (autoload 'org-agenda-list "org-agenda" "\
 Produce a daily/weekly view from all files in variable `org-agenda-files'.
@@ -510,8 +510,8 @@ to override `appt-message-warning-time'.
 ;;;***
 
 ;;;### (autoloads (org-capture-import-remember-templates org-capture
-;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21158
-;;;;;;  46783))
+;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21173
+;;;;;;  8283 387856 898000))
 ;;; Generated autoloads from org-capture.el
 
 (autoload 'org-capture-string "org-capture" "\
@@ -556,7 +556,7 @@ Set `org-capture-templates' to be similar to `org-remember-templates'.
 ;;;### (autoloads (org-agenda-columns org-insert-columns-dblock org-dblock-write:columnview
 ;;;;;;  org-columns-number-to-string org-columns-compute org-columns
 ;;;;;;  org-columns-get-format-and-top-level org-columns-remove-overlays)
-;;;;;;  "org-colview" "org-colview.el" (21158 46783))
+;;;;;;  "org-colview" "org-colview.el" (21173 8283 155856 906000))
 ;;; Generated autoloads from org-colview.el
 
 (autoload 'org-columns-remove-overlays "org-colview" "\
@@ -620,29 +620,29 @@ Turn on or update column view in the agenda.
 ;;;***
 
 ;;;### (autoloads (org-check-version) "org-compat" "org-compat.el"
-;;;;;;  (21158 46783))
+;;;;;;  (21173 8283 107856 908000))
 ;;; Generated autoloads from org-compat.el
 
 (autoload 'org-check-version "org-compat" "\
 Try very hard to provide sensible version strings.
 
-\(fn)" nil (quote macro))
+\(fn)" nil t)
 
 ;;;***
 
 ;;;### (autoloads (org-load-noerror-mustsuffix) "org-macs" "org-macs.el"
-;;;;;;  (21158 46783))
+;;;;;;  (21173 8283 327856 900000))
 ;;; Generated autoloads from org-macs.el
 
 (autoload 'org-load-noerror-mustsuffix "org-macs" "\
 Load FILE with optional arguments NOERROR and MUSTSUFFIX.  Drop the MUSTSUFFIX argument for XEmacs, which doesn't recognize it.
 
-\(fn FILE)" nil (quote macro))
+\(fn FILE)" nil t)
 
 ;;;***
 
 ;;;### (autoloads (org-git-version org-release) "org-version" "org-version.el"
-;;;;;;  (21158 46783))
+;;;;;;  (21173 8283 399856 897000))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -685,7 +685,7 @@ The location of ODT styles.")
 ;;;;;;  "org-table.el" "org-timer.el" "org-w3m.el" "ox-ascii.el"
 ;;;;;;  "ox-beamer.el" "ox-html.el" "ox-icalendar.el" "ox-latex.el"
 ;;;;;;  "ox-man.el" "ox-md.el" "ox-odt.el" "ox-org.el" "ox-publish.el"
-;;;;;;  "ox-texinfo.el" "ox.el") (21158 46783 495684))
+;;;;;;  "ox-texinfo.el" "ox.el") (21173 8283 519717 203000))
 
 ;;;***
 

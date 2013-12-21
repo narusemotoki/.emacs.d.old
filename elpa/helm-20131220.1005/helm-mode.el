@@ -216,6 +216,7 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                                  (name "Helm Completions")
                                  candidates-in-buffer
                                  exec-when-only-one
+                                 quit-when-no-cand
                                  (volatile t)
                                  sort
                                  (fc-transformer 'helm-cr-default-transformer)
@@ -389,6 +390,7 @@ that use `helm-comp-read' See `helm-M-x' for example."
                                    (append src '((volatile)))
                                    src))))
            (helm-execute-action-at-once-if-one exec-when-only-one)
+           (helm-quit-if-no-candidate quit-when-no-cand)
            result)
       (when reverse-history (setq src-list (nreverse src-list)))
       (setq result (helm
@@ -872,16 +874,49 @@ Can be used as value for `completion-in-region-function'."
                             ;; completion-at-point or friend, so use a non--nil
                             ;; value for require-match.
                             (not (boundp 'prompt))))
+         (data (all-completions input collection predicate))
+         (file-comp-p (helm-mode--in-file-completion-p input (car data)))
          ;; Completion-at-point and friends have no prompt.
          (result (helm-comp-read (or (and (boundp 'prompt) prompt) "Pattern: ")
-                                 (all-completions input collection predicate)
+                                 (if file-comp-p
+                                     (cl-loop for f in data unless
+                                              (string-match "\\`\\.\\{1,2\\}/\\'" f)
+                                              collect f)
+                                     data)
                                  :name str-command
-                                 :initial-input (concat input " ")
-                                 :buffer buf-name
-                                 :must-match require-match)))
+                                 :initial-input
+                                 (cond ((and file-comp-p
+                                             (not (string-match "/\\'" input)))
+                                        (concat (helm-basename input)
+                                                (unless (string= input "") " ")))
+                                       ((string-match "/\\'" input) nil)
+                                       ((or (null require-match)
+                                            (stringp require-match))
+                                        input)
+                                       (t (concat input " ")))
+                                  :buffer buf-name
+                                  :exec-when-only-one t
+                                  :quit-when-no-cand t
+                                  :must-match require-match)))
     (when result
-      (delete-region start end)
+      (delete-region (if (and file-comp-p
+                              (save-excursion
+                                (re-search-backward
+                                 "~?/"
+                                 (previous-single-property-change
+                                  (point) 'read-only) t)))
+                         (match-end 0) start)
+                     end)
       (insert result))))
+
+(defun helm-mode--in-file-completion-p (target candidate)
+  (when (and candidate target)
+    (or (string-match "/\\'" candidate)
+        (if (string-match "~?/" target)
+            (file-exists-p (expand-file-name candidate (helm-basedir target)))
+            (file-exists-p (expand-file-name
+                            candidate (with-helm-current-buffer
+                                        default-directory)))))))
 
 (when (boundp 'completion-in-region-function)
   (defconst helm--old-completion-in-region-function completion-in-region-function))

@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2010 Chris Wanstrath
 
-;; Version: 20131215.522
+;; Version: 20131217.700
 ;; X-Original-Version: 0.5.0
 ;; Keywords: CoffeeScript major mode
 ;; Author: Chris Wanstrath <chris@ozmm.org>
@@ -143,7 +143,7 @@
 ;; Customizable Variables
 ;;
 
-(defconst coffee-mode-version "0.4.1"
+(defconst coffee-mode-version "0.5.0"
   "The version of `coffee-mode'.")
 
 (defgroup coffee nil
@@ -640,13 +640,15 @@ output in a compilation buffer."
 
     ;; We need to insert an additional tab because the last line was special.
     (when (coffee-line-wants-indent)
-      (insert-tab)))
+      (insert-tab))
 
-  ;; Last line was a comment so this one should probably be,
-  ;; too. Makes it easy to write multi-line comments (like the one I'm
-  ;; writing right now).
-  (when (coffee-previous-line-is-comment)
-    (insert "# ")))
+    ;; Last line was a comment so this one should probably be,
+    ;; too. Makes it easy to write multi-line comments (like the one I'm
+    ;; writing right now).
+    (when (coffee-previous-line-is-single-line-comment)
+      (dotimes (i prev-indent)
+        (insert " "))
+      (insert "# "))))
 
 (defun coffee-dedent-line-backspace (arg)
   "Unindent to increment of `coffee-tab-width' with ARG==1 when
@@ -695,17 +697,16 @@ previous line."
             (back-to-indentation)
             (looking-at (coffee-indenters-bol-regexp)))))))
 
-(defun coffee-previous-line-is-comment ()
-  "Return t if the previous line is a CoffeeScript comment."
+(defun coffee-previous-line-is-single-line-comment ()
+  "Return t if the previous line is a CoffeeScript single line comment."
   (save-excursion
     (forward-line -1)
-    (coffee-line-is-comment)))
-
-(defun coffee-line-is-comment ()
-  "Return t if the current line is a CoffeeScript comment."
-  (save-excursion
-    (backward-to-indentation 0)
-    (= (char-after) (string-to-char "#"))))
+    (back-to-indentation)
+    (and (looking-at "#")
+         (not (looking-at "###\\(?:\\s-+.*\\)?$"))
+         (progn
+           (goto-char (line-end-position))
+           (nth 4 (syntax-ppss))))))
 
 (defun coffee-indent-shift-amount (start end dir)
   "Compute distance to the closest increment of `coffee-tab-width'."
@@ -974,6 +975,14 @@ comments such as the following:
    (syntax-propertize-rules
     (coffee-block-strings-delimiter
      (0 (ignore (coffee-syntax-block-strings-stringify))))
+    ("\\(?:[^\\]\\)\\(/\\)"
+     (1 (ignore
+         (let ((ppss (progn
+                       (goto-char (match-beginning 1))
+                       (syntax-ppss))))
+           (when (nth 8 ppss)
+             (put-text-property (match-beginning 1) (match-end 1)
+                                'syntax-table (string-to-syntax "_")))))))
     (coffee-regexp-regexp (1 (string-to-syntax "_")))
     ("^[[:space:]]*\\(###\\)\\(?:[[:space:]]+.*\\)?$"
      (1 (string-to-syntax "!"))))

@@ -1588,10 +1588,14 @@ ANY-KEYMAP ANY-DEFAULT ANY-HISTORY See `helm'."
           ;; This is not needed in emacs-24.3+
           (cursor-in-echo-area t)
           (non-essential t)
+          (old--cua cua-mode)
           (helm-maybe-use-default-as-input
            (or helm-maybe-use-default-as-input ; it is let-bounded so use it.
                (cl-loop for s in (helm-normalize-sources any-sources)
                         thereis (memq s helm-sources-using-default-as-input)))))
+      ;; cua-mode overhide local helm bindings.
+      ;; disable this stupid thing if enabled.
+      (and cua-mode (cua-mode -1))
       (unwind-protect
            (condition-case _v
                (let (;; `helm-source-name' is non-nil
@@ -1626,8 +1630,8 @@ ANY-KEYMAP ANY-DEFAULT ANY-HISTORY See `helm'."
         (setq overriding-local-map old-overridding-local-map)
         (setq helm-alive-p nil)
         (setq helm-in-file-completion-p nil)
+        (and old--cua (cua-mode 1))
         (helm-log-save-maybe)))))
-
 
 
 ;;; Helm resume
@@ -2602,7 +2606,7 @@ is done on whole `helm-buffer' and not on current source."
          ;; These incomplete regexps hang helm forever
          ;; so defer update. Maybe replace spaces quoted when using
          ;; match-plugin-mode.
-         (not (member (replace-regexp-in-string "\\s\\" "" helm-pattern)
+         (not (member (replace-regexp-in-string "\\s\\ " " " helm-pattern)
                       helm-update-blacklist-regexps)))))
 
 (defun helm-delayed-source-p (source)
@@ -2772,7 +2776,7 @@ after the source name by overlay."
                                 (setcdr incomplete-line-info nil))
                               line)
             do (helm--maybe-process-filter-one-by-one-candidate newline source)
-            and collect newline
+            and if newline collect newline
             ;; Store last incomplete line (last chunk truncated)
             ;; until new output arrives.
             finally do (setcdr incomplete-line-info line))))

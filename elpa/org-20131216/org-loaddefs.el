@@ -292,7 +292,7 @@ used to limit the exported source code blocks by language.
 ;;;;;;  org-search-view org-agenda-list org-batch-store-agenda-views
 ;;;;;;  org-store-agenda-views org-batch-agenda-csv org-batch-agenda
 ;;;;;;  org-agenda org-toggle-sticky-agenda) "org-agenda" "org-agenda.el"
-;;;;;;  (21156 3440))
+;;;;;;  (21165 18418))
 ;;; Generated autoloads from org-agenda.el
 
 (autoload 'org-toggle-sticky-agenda "org-agenda" "\
@@ -644,8 +644,8 @@ Extract anniversaries from BBDB for display in the agenda.
 ;;;***
 
 ;;;### (autoloads (org-capture-import-remember-templates org-capture
-;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21156
-;;;;;;  3440))
+;;;;;;  org-capture-string) "org-capture" "org-capture.el" (21165
+;;;;;;  18418))
 ;;; Generated autoloads from org-capture.el
 
 (autoload 'org-capture-string "org-capture" "\
@@ -821,7 +821,7 @@ Otherwise, return nil.
 ;;;### (autoloads (org-agenda-columns org-insert-columns-dblock org-dblock-write:columnview
 ;;;;;;  org-columns-number-to-string org-columns-compute org-columns
 ;;;;;;  org-columns-get-format-and-top-level org-columns-remove-overlays)
-;;;;;;  "org-colview" "org-colview.el" (21156 3440))
+;;;;;;  "org-colview" "org-colview.el" (21165 18418))
 ;;; Generated autoloads from org-colview.el
 
 (autoload 'org-columns-remove-overlays "org-colview" "\
@@ -910,7 +910,7 @@ tree can be found.
 ;;;***
 
 ;;;### (autoloads (org-element-context org-element-at-point org-element-interpret-data)
-;;;;;;  "org-element" "org-element.el" "4895faf7cc60668a4fd4821b8805826b")
+;;;;;;  "org-element" "org-element.el" "dba3929e837958c30eba1f6d39c1167f")
 ;;; Generated autoloads from org-element.el
 
 (autoload 'org-element-interpret-data "org-element" "\
@@ -1891,7 +1891,7 @@ replace any running timer.
 ;;;***
 
 ;;;### (autoloads (org-git-version org-release) "org-version" "org-version.el"
-;;;;;;  (21157 23681))
+;;;;;;  (21166 38664))
 ;;; Generated autoloads from org-version.el
 
 (autoload 'org-release "org-version" "\
@@ -1917,7 +1917,7 @@ The location of ODT styles.")
 ;;;;;;  org-run-like-in-org-mode turn-on-orgstruct++ turn-on-orgstruct
 ;;;;;;  orgstruct-mode org-global-cycle org-cycle org-mode org-clock-persistence-insinuate
 ;;;;;;  turn-on-orgtbl org-version org-babel-load-file org-babel-do-load-languages)
-;;;;;;  "org" "org.el" (21156 3442))
+;;;;;;  "org" "org.el" (21165 18419))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-babel-do-load-languages "org" "\
@@ -2247,6 +2247,8 @@ This function returns BUFFER.
 
 \(fn BACKEND BUFFER &optional ASYNC SUBTREEP VISIBLE-ONLY BODY-ONLY EXT-PLIST POST-PROCESS)" nil nil)
 
+(put 'org-export-to-buffer 'lisp-indent-function '2)
+
 (autoload 'org-export-to-file "ox" "\
 Call `org-export-as' with output to a specified file.
 
@@ -2280,6 +2282,8 @@ The function returns either a file name returned by POST-PROCESS,
 or FILE.
 
 \(fn BACKEND FILE &optional ASYNC SUBTREEP VISIBLE-ONLY BODY-ONLY EXT-PLIST POST-PROCESS)" nil nil)
+
+(put 'org-export-to-file 'lisp-indent-function '2)
 
 (autoload 'org-export-dispatch "ox" "\
 Export dispatcher for Org mode.
@@ -2962,7 +2966,7 @@ using `org-open-file'.
 ;;;***
 
 ;;;### (autoloads (org-org-publish-to-org org-org-export-to-org org-org-export-as-org)
-;;;;;;  "ox-org" "ox-org.el" "6e1a106b8efe79c352cc72ac77ad8d91")
+;;;;;;  "ox-org" "ox-org.el" "bf51c392f08488614052228cc988f624")
 ;;; Generated autoloads from ox-org.el
 
 (autoload 'org-org-export-as-org "ox-org" "\
