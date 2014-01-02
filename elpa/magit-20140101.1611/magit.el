@@ -1618,6 +1618,23 @@ Read `completing-read' documentation for the meaning of the argument."
            (concat prompt ": ") collection predicate
            require-match initial-input hist def))
 
+(defvar magit-gpg-secret-key-hist nil)
+
+(defun magit-read-gpg-secret-key (prompt)
+  (let ((keys (mapcar
+               (lambda (key)
+                 (list (epg-sub-key-id (car (epg-key-sub-key-list key)))
+                       (let ((id-obj (car (epg-key-user-id-list key)))
+                             (id-str nil))
+                         (when id-obj
+                           (setq id-str (epg-user-id-string id-obj))
+                           (if (stringp id-str)
+                               id-str
+                             (epg-decode-dn id-obj))))))
+               (epg-list-keys (epg-make-context epa-protocol) nil t))))
+  (magit-completing-read prompt keys nil t nil nil
+                         (or (car magit-gpg-secret-key-hist) (car keys)))))
+
 ;;;; Various Utilities
 
 (defmacro magit-bind-match-strings (varlist &rest body)
@@ -2956,9 +2973,8 @@ repository."
                         nil 'magit-git-command-history)
            dir)))
   (require 'eshell)
-  (magit-mode-display-buffer magit-process-buffer-name
-                             'magit-process-mode
-                             'pop-to-buffer)
+  (magit-mode-display-buffer (magit-process-buffer nil t)
+                             'magit-process-mode 'pop-to-buffer)
   (goto-char (point-max))
   (let ((default-directory directory))
     (magit-run-git-async
@@ -2985,59 +3001,18 @@ Run Git in the root of the current repository."
   "Name of buffer where output of processes is put.")
 
 (defun magit-process-buffer (&optional topdir create)
-  (magit-mode-get-buffer magit-process-buffer-name
-                         'magit-process-mode topdir create))
-
-(defun magit-process-setup (program args)
-  (magit-process-set-mode-line program args)
-  (let ((inhibit-read-only t)
-        (dir default-directory)
-        (buf (magit-process-buffer)))
-    (if buf
-        (with-current-buffer buf
-          (let* ((head nil)
-                 (tail (magit-section-children magit-root-section))
-                 (count (length tail)))
-            (when (> (1+ count) magit-process-log-max)
-              (while (and (cdr tail)
-                          (> count (/ magit-process-log-max 2)))
-                (let* ((section (car tail))
-                       (process (magit-section-process section)))
-                  (cond ((not process))
-                        ((memq (process-status process) '(exit signal))
-                         (delete-region (magit-section-beginning section)
-                                        (1+ (magit-section-end section)))
-                         (cl-decf count))
-                        (t
-                         (push section head))))
-                (pop tail))
-              (setf (magit-section-children magit-root-section)
-                    (nconc (reverse head) tail)))))
-      (with-current-buffer (setq buf (magit-process-buffer nil t))
+  (or (magit-mode-get-buffer magit-process-buffer-name
+                             'magit-process-mode topdir)
+      (with-current-buffer (magit-mode-get-buffer-create
+                            magit-process-buffer-name
+                            'magit-process-mode topdir)
         (magit-process-mode)
-        (let ((section (magit-with-section (section processbuf nil nil t)
-                         (insert "\n"))))
-          (set-marker-insertion-type
-           (magit-section-beginning section) nil)
-          (set-marker-insertion-type
-           (magit-section-content-beginning section) nil))))
-    (with-current-buffer buf
-      (setq default-directory dir)
-      (goto-char (1- (point-max)))
-      (let* ((magit-with-section--parent magit-root-section)
-             ;; Kids, don't do this ^^^^ at home.
-             (section (magit-with-section
-                          (section
-                           process nil
-                           (mapconcat 'identity (cons program args) " "))
-                        (insert "\n"))))
-        (set-marker-insertion-type
-         (magit-section-content-beginning section) nil)
-        (unless (get-buffer-window (current-buffer) t)
-          (magit-section-set-hidden section t))
-        (insert "\n")
-        (backward-char 2)
-        (cons (current-buffer) section)))))
+        (let* ((inhibit-read-only t)
+               (s (magit-with-section (section processbuf nil nil t)
+                    (insert "\n"))))
+          (set-marker-insertion-type (magit-section-beginning s) nil)
+          (set-marker-insertion-type (magit-section-content-beginning s) nil)
+          (current-buffer)))))
 
 ;;;; Process Api
 ;;;;; Synchronous Processes
@@ -3267,6 +3242,50 @@ repository are reverted using `auto-revert-buffers'."
       process)))
 
 ;;;; Process Internals
+
+(defun magit-process-setup (program args)
+  (magit-process-set-mode-line program args)
+  (let ((buf (magit-process-buffer)))
+    (if  buf
+        (magit-process-truncate-log buf)
+      (setq buf (magit-process-buffer nil t)))
+    (with-current-buffer buf
+      (goto-char (1- (point-max)))
+      (let* ((inhibit-read-only t)
+             (magit-with-section--parent magit-root-section)
+             ;; Kids, don't do this ^^^^ at home.
+             (s (magit-with-section
+                    (section process nil
+                             (mapconcat 'identity (cons program args) " "))
+                  (insert "\n"))))
+        (set-marker-insertion-type (magit-section-content-beginning s) nil)
+        (unless (get-buffer-window (current-buffer) t)
+          (magit-section-set-hidden s t))
+        (insert "\n")
+        (backward-char 2)
+        (cons (current-buffer) s)))))
+
+(defun magit-process-truncate-log (buffer)
+  (with-current-buffer buffer
+    (let* ((head nil)
+           (tail (magit-section-children magit-root-section))
+           (count (length tail)))
+      (when (> (1+ count) magit-process-log-max)
+        (while (and (cdr tail)
+                    (> count (/ magit-process-log-max 2)))
+          (let* ((inhibit-read-only t)
+                 (section (car tail))
+                 (process (magit-section-process section)))
+            (cond ((not process))
+                  ((memq (process-status process) '(exit signal))
+                   (delete-region (magit-section-beginning section)
+                                  (1+ (magit-section-end section)))
+                   (cl-decf count))
+                  (t
+                   (push section head))))
+          (pop tail))
+        (setf (magit-section-children magit-root-section)
+              (nconc (reverse head) tail))))))
 
 (defun magit-process-sentinel (process event)
   "Default sentinel used by `magit-start-process'."
@@ -5876,6 +5895,7 @@ depending on the value of option `magit-commit-squash-commit'.
                                    nil t))
            ;; No entry for file, create it.
            (goto-char (point-max))
+           (forward-comment -1000)
            (insert (format "\n* %s" file))
            (when fun
              (insert (format " (%s)" fun)))
@@ -5892,10 +5912,12 @@ depending on the value of option `magit-commit-squash-commit'.
                     ;; found it, goto end of current entry
                     (if (re-search-forward "^(" limit t)
                         (backward-char 2)
-                      (goto-char limit)))
+                      (goto-char limit))
+                    (forward-comment -1000))
                    (t
                     ;; not found, insert new entry
                     (goto-char limit)
+                    (forward-comment -1000)
                     (if (bolp)
                         (open-line 1)
                       (newline))
@@ -6530,8 +6552,8 @@ Other key binding:
       (let ((revs (split-string
                    (magit-git-string "rev-list" "-1" "--parents"
                                      (car (last magit-refresh-args))))))
-        (when (<= (length revs) 3)
-          revs))
+        (when (= (length revs) 2)
+          (cons (cadr revs) (car revs))))
     (magit-section-diff-range diff)))
 
 (defun magit-ediff-add-cleanup ()
@@ -7074,7 +7096,7 @@ return the buffer, without displaying it."
        ((hunk)   (setq section (magit-section-parent item)))
        ((diff)   (setq section item)))
      (if section
-         (setq rev  (cdr (magit-diff-range section))
+         (setq rev  (cadr (magit-diff-range section))
                file (magit-section-info section))
        (unless rev
          (setq rev (magit-get-current-branch))))

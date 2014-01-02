@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2010 Chris Wanstrath
 
-;; Version: 20131230.1534
+;; Version: 20140101.2325
 ;; X-Original-Version: 0.5.0
 ;; Keywords: CoffeeScript major mode
 ;; Author: Chris Wanstrath <chris@ozmm.org>
@@ -234,8 +234,10 @@ with CoffeeScript."
   (let ((map (make-sparse-keymap)))
     ;; key bindings
     (define-key map (kbd "A-r") 'coffee-compile-buffer)
+    (define-key map (kbd "C-c C-k") 'coffee-compile-buffer)
     (define-key map (kbd "A-R") 'coffee-compile-region)
     (define-key map (kbd "A-M-r") 'coffee-repl)
+    (define-key map (kbd "C-c C-z") 'coffee-repl)
     (define-key map [remap comment-dwim] 'coffee-comment-dwim)
     (define-key map [remap newline-and-indent] 'coffee-newline-and-indent)
     (define-key map "\C-m" 'coffee-newline-and-indent)
@@ -429,7 +431,7 @@ called `coffee-compiled-buffer-name'."
 (defvar coffee-local-assign-regexp "\\s-*\\([[:word:].$]+\\)\\s-*=\\(?:[^>]\\|$\\)")
 
 ;; Lambda
-(defvar coffee-lambda-regexp "\\(?:(.+)\\)?\\s-*\\(->\\|=>\\)")
+(defvar coffee-lambda-regexp "\\(?:(.*)\\)?\\s-*\\(->\\|=>\\)")
 
 ;; Namespaces
 (defvar coffee-namespace-regexp "\\b\\(?:class\\s-+\\(\\S-+\\)\\)\\b")
@@ -541,7 +543,7 @@ output in a compilation buffer."
   (concat "^\\(\\s-*\\)" ; $1
           "\\(?:"
           coffee-assign-regexp ; $2
-          "\\s-+"
+          "\\s-*"
           coffee-lambda-regexp
           "\\|"
           coffee-namespace-regexp ; $4
@@ -799,7 +801,7 @@ comments such as the following:
 (defconst coffee-defun-regexp
   (concat "^\\s-*\\(?:"
           coffee-assign-regexp
-          "\\s-+"
+          "\\s-*"
           coffee-lambda-regexp
           "\\|"
           coffee-namespace-regexp
