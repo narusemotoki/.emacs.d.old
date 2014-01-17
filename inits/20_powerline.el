@@ -1,6 +1,13 @@
 ;--------------------------------------------------------------------------------
 ; モードラインを綺麗にする
 ;--------------------------------------------------------------------------------
+(defpowerline powerline-vc-short
+  (when (and (buffer-file-name (current-buffer))
+             vc-mode)
+    (setq branch (format-mode-line '(vc-mode vc-mode)))
+    (setq len (min (length branch) 30))
+    (substring branch 0 len)))
+
 (defface powerline-active1-color '((t (:background "#0044CC" :inherit mode-line)))
   "Powerline face 1."
   :group 'powerline)
@@ -56,7 +63,7 @@
                                    (powerline-narrow face2 'l)
                                    (powerline-raw " " face2)
                                    (funcall separator-left face2 face3)
-                                   (powerline-vc face3 'r)))
+                                   (powerline-vc-short face3 'r)))
                         (rhs (list (powerline-raw global-mode-string face2 'r)
                                    (funcall separator-right face3 face2)
                                    (powerline-minor-modes face2 'l)
