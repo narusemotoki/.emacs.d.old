@@ -4,6 +4,7 @@
   '( ;; For minor-mode, first char is 'space'
     (yas-minor-mode . " Ys")
     (paredit-mode . "")
+    (anzu-mode . "")
     (eldoc-mode . "")
     (abbrev-mode . "")
     (undo-tree-mode . "")
