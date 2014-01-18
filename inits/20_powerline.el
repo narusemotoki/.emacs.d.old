@@ -49,7 +49,6 @@
                                                          powerline-default-separator
                                                          (cdr powerline-default-separator-dir))))
                         (lhs (list (powerline-raw "%*" face1 'l)
-                                   ;(powerline-buffer-size face1 'l)
                                    (powerline-raw mode-line-mule-info face1 'l)
                                    (powerline-buffer-id face1 'l)
                                    (when (and (boundp 'which-func-mode) which-func-mode)
