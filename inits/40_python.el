@@ -15,11 +15,10 @@
 (add-hook 'python-mode-hook
     '(lambda ()
        ; インデントを考えてくれる
-       (define-key (current-local-map) "\C-h" 'python-backspace)
+       (define-key (current-local-map) "\C-h" 'python-indent-dedent-line-backspace)
        ; pep8
        (define-key (current-local-map) "\C-c8" 'pep8)
     ))
-
 
 ; indentation
 (defadvice python-calculate-indentation (around outdent-closing-brackets)
