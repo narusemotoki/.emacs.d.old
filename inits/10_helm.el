@@ -9,6 +9,10 @@
 (global-set-key (kbd "C-x C-r") 'helm-recentf)
 ; kill-ringを一覧表示する
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+; Gitで管理されているファイルから絞り込む
+(global-set-key (kbd "C-c C-l") 'helm-ls-git-ls)
+; Gitでgrep
+(global-set-key (kbd "C-C C-g") 'helm-git-grep)
 
 ; 高速で反応させる
 (setq helm-idle-delay 0.1)
