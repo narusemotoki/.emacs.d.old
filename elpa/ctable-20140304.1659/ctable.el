@@ -4,7 +4,7 @@
 
 ;; Author: SAKURAI Masashi <m.sakurai at kiwanami.net>
 ;; URL: https://github.com/kiwanami/emacs-ctable
-;; Version: 20140301.1809
+;; Version: 20140304.1659
 ;; X-Original-Version: 0.1.2
 ;; Keywords: table
 
@@ -42,7 +42,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl)
 
 (declare-function popup-tip "popup")
 (declare-function pos-tip-show "pos-tip")
@@ -1899,4 +1899,10 @@ WIDTH and HEIGHT are reference size of the table view."
 ;; (progn (eval-current-buffer) (ctbl:demo))
 
 (provide 'ctable)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; ctable.el ends here
