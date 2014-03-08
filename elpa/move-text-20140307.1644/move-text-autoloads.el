@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads (move-text-up move-text-down) "move-text" "move-text.el"
-;;;;;;  (21273 6455 875255 570000))
+;;;### (autoloads (move-text-default-bindings move-text-up move-text-down)
+;;;;;;  "move-text" "move-text.el" (21274 65275 778013 56000))
 ;;; Generated autoloads from move-text.el
 
 (autoload 'move-text-down "move-text" "\
@@ -19,10 +19,15 @@ Move region (transient-mark-mode active) or current line
 
 \(fn ARG)" t nil)
 
+(autoload 'move-text-default-bindings "move-text" "\
+Bind `move-text-up' and `move-text-down' to M-up and M-down.
+
+\(fn)" nil nil)
+
 ;;;***
 
-;;;### (autoloads nil nil ("move-text-pkg.el") (21273 6455 886416
-;;;;;;  539000))
+;;;### (autoloads nil nil ("move-text-pkg.el") (21274 65275 785565
+;;;;;;  195000))
 
 ;;;***
 

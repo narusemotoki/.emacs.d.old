@@ -1,13 +1,13 @@
-;;; coffee-mode.el --- Major mode to edit CoffeeScript files in Emacs
+;;; coffee-mode.el --- Major mode to edit CoffeeScript files in Emacs -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010 Chris Wanstrath
 
-;; Version: 20140301.513
+;; Version: 20140307.720
 ;; X-Original-Version: 0.5.0
 ;; Keywords: CoffeeScript major mode
 ;; Author: Chris Wanstrath <chris@ozmm.org>
 ;; URL: http://github.com/defunkt/coffee-mode
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -136,8 +136,7 @@
 (require 'font-lock)
 (require 'rx)
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (declare-function electric-pair-backward-delete-char-untabify "elec-pair")
 
@@ -324,6 +323,14 @@ called `coffee-compiled-buffer-name'."
   (interactive)
   (coffee-compile-region (point-min) (point-max)))
 
+(defsubst coffee-generate-sourcemap-p ()
+  (cl-find-if (lambda (opt) (member opt '("-m" "--map"))) coffee-args-compile))
+
+(defun coffee-generate-sourcemap ()
+  (let ((file (buffer-file-name)))
+    (unless (zerop (call-process coffee-command nil nil nil "-m" file))
+      (error "Can't generate sourcemap %s" (file-name-nondirectory file)))))
+
 (defun coffee-compile-region (start end)
   "Compiles a region and displays the JavaScript in a buffer called
 `coffee-compiled-buffer-name'."
@@ -340,6 +347,8 @@ called `coffee-compiled-buffer-name'."
                           nil)
          (append coffee-args-compile (list "-s" "-p")))
 
+  (when (coffee-generate-sourcemap-p)
+    (coffee-generate-sourcemap))
   (let ((buffer (get-buffer coffee-compiled-buffer-name)))
     (save-selected-window
       (pop-to-buffer buffer)
@@ -529,7 +538,7 @@ For details, see `comment-dwim'."
 output in a compilation buffer."
   (interactive "sArguments: ")
   (let ((compilation-buffer-name-function
-         (lambda (this-mode)
+         (lambda (_this-mode)
            (generate-new-buffer-name coffee-compiled-buffer-name))))
     (compile (concat coffee-command " " args))))
 
@@ -607,8 +616,7 @@ output in a compilation buffer."
   (if (= (point) (line-beginning-position))
       (coffee-insert-spaces coffee-tab-width)
     (save-excursion
-      (let ((prev-indent (coffee-previous-indent))
-            (cur-indent (current-indentation)))
+      (let ((prev-indent (coffee-previous-indent)))
         ;; Shift one column to the left
         (beginning-of-line)
         (coffee-insert-spaces coffee-tab-width)
@@ -638,8 +646,7 @@ output in a compilation buffer."
   ;; Remember the current line indentation level,
   ;; insert a newline, and indent the newline to the same
   ;; level as the previous line.
-  (let ((prev-indent (current-indentation))
-        (indent-next nil))
+  (let ((prev-indent (current-indentation)))
     (delete-horizontal-space t)
     (newline)
     (coffee-insert-spaces prev-indent)
@@ -886,7 +893,7 @@ comments such as the following:
           (let ((cur-indent (current-indentation)))
             (when (<= cur-indent start-indent)
               (setq start-indent cur-indent)
-              (decf count)))
+              (cl-decf count)))
           (when (<= count 0)
             (back-to-indentation)
             (setq finish t)))))))
@@ -896,7 +903,7 @@ comments such as the following:
   (interactive "p")
   (unless count
     (setq count 1))
-  (dotimes (i count)
+  (dotimes (_i count)
     (let* ((curline-is-defun (coffee-current-line-is-defun))
            start-indent)
       (coffee-skip-forward-lines 1)
@@ -966,7 +973,7 @@ comments such as the following:
     (while (and (< i 3)
                 (< (+ start-point i) limit)
                 (eq (char-after (+ start-point i)) quote-char))
-      (incf i))
+      (cl-incf i))
     i))
 
 (defun coffee-syntax-block-strings-stringify ()
@@ -1080,7 +1087,7 @@ comments such as the following:
 
   ;; Don't let electric-indent-mode break coffee-mode.
   (set (make-local-variable 'electric-indent-functions)
-       (list (lambda (arg) 'no-indent)))
+       (list (lambda (_arg) 'no-indent)))
 
   ;; no tabs
   (setq indent-tabs-mode coffee-indent-tabs-mode))
