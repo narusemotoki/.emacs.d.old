@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads (free-keys) "free-keys" "free-keys.el" (21176 18675
-;;;;;;  902875 260000))
+;;;### (autoloads (free-keys) "free-keys" "free-keys.el" (21277 2496
+;;;;;;  13651 763000))
 ;;; Generated autoloads from free-keys.el
 
 (autoload 'free-keys "free-keys" "\
@@ -23,8 +23,8 @@ format recognized by `kbd', for example \"C-x\".
 
 ;;;***
 
-;;;### (autoloads nil nil ("free-keys-pkg.el") (21176 18675 910597
-;;;;;;  216000))
+;;;### (autoloads nil nil ("free-keys-pkg.el") (21277 2496 55330
+;;;;;;  183000))
 
 ;;;***
 

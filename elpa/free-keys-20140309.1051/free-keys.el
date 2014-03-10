@@ -4,7 +4,7 @@
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Version: 20131222.740
+;; Version: 20140309.1051
 ;; X-Original-Version: 0.1
 ;; Created: 3rd November 2013
 ;; Keywords: convenience
@@ -50,6 +50,37 @@
   "String of keys that can be used as bindings."
   :type 'string
   :group 'free-keys)
+
+(defcustom free-keys-ignored-bindings nil
+  "List of bindings with modifiers which should never be considered free.
+
+The elements could be either strings of form \"MOD-KEY\" or cons
+where the car is a single letter modifier as in
+`free-keys-modifiers' and the cdr is a string containing keys to
+be ignored with this modifiers, like `free-keys-keys'.
+
+The bindings should not contain a prefix.  This can typically be
+used to ignore bindings intercepted by the window manager used
+for swapping windows and similar operations."
+  :type '(repeat (choice (string :tag "Key binding")
+                         (cons :tag "Modifier and string of key bindings"
+                               (string :tag "Modifier")
+                               (string :tag "Key bindings"))))
+  :group 'free-keys)
+
+(defun free-keys-ignored-bindings ()
+  "Return a list of bindings that should never be considered free.
+
+The elements of the returned list are of form \"MOD-KEY\".
+
+See also the variable `free-keys-ignored-bindings'."
+  (apply 'append
+         (mapcar (lambda (x)
+                   (if (stringp x) (list x)
+                     (mapcar (lambda (y)
+                               (concat (car x) "-" (char-to-string y)))
+                             (cdr x))))
+                 free-keys-ignored-bindings)))
 
 (defvar free-keys-mode-map
   (let ((map (make-keymap)))
@@ -103,7 +134,30 @@ BUFFER and update the display."
 This simply calls `free-keys'."
   (free-keys nil free-keys-original-buffer))
 
-;; TODO: split this function into something cleaner.
+(defun free-keys--process-modifier (prefix modifier)
+  "Process free bindings for MODIFIER."
+  (let (empty-keys)
+    (mapc (lambda (key)
+            (let* ((key-name
+                    (if (not (equal modifier ""))
+                        (concat modifier "-" (char-to-string key))
+                      (char-to-string key)))
+                   (full-name
+                    (if (and prefix (not (equal prefix ""))) (concat prefix " " key-name) key-name))
+                   (binding
+                    (with-current-buffer free-keys-original-buffer (key-binding (read-kbd-macro full-name)))))
+              (when (and (not (member key-name (free-keys-ignored-bindings)))
+                         (or (not binding)
+                             (eq binding 'undefined)))
+                (push full-name empty-keys))))
+          free-keys-keys)
+    (let ((len (length empty-keys)))
+      (when (> len 0)
+        (if (not (equal modifier ""))
+            (insert (format "With modifier %s (%d free)\n=========================\n" modifier len))
+          (insert (format "With no modifier (%d free)\n=========================\n" len)))
+        (free-keys--print-in-columns (nreverse empty-keys))
+        (insert "\n\n")))))
 
 ;;;###autoload
 (defun free-keys (&optional prefix buffer)
@@ -133,31 +187,8 @@ format recognized by `kbd', for example \"C-x\"."
               " in buffer "
               (buffer-name free-keys-original-buffer)
               " (major mode: " (with-current-buffer free-keys-original-buffer (symbol-name major-mode)) ")\n\n")
-      (mapc (lambda (modifier)
-              (let (empty-keys)
-                (mapc (lambda (key)
-                        (let* ((key-name
-                                (if (not (equal modifier ""))
-                                    (concat modifier "-" (char-to-string key))
-                                  (char-to-string key)))
-                               (full-name
-                                (if (and prefix (not (equal prefix ""))) (concat prefix " " key-name) key-name))
-                               (binding
-                                (with-current-buffer free-keys-original-buffer (key-binding (read-kbd-macro full-name)))))
-                          (when (or (not binding)
-                                    (eq binding 'undefined))
-                            (push full-name empty-keys))))
-                      free-keys-keys)
-                (let ((len (length empty-keys)))
-                  (when (> len 0)
-                    (if (not (equal modifier ""))
-                        (insert (format "With modifier %s (%d free)\n=========================\n" modifier len))
-                      (insert (format "With no modifier (%d free)\n=========================\n" len)))
-                    (free-keys--print-in-columns (nreverse empty-keys))
-                    (insert "\n\n")))))
-            free-keys-modifiers)
+      (mapc (lambda (m) (free-keys--process-modifier prefix m)) free-keys-modifiers)
       (setq buffer-read-only t)
-      (make-local-variable 'buffer-read-only)
       (goto-char 0)
       (free-keys-mode))))
 

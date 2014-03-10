@@ -1,17 +1,13 @@
 ;;; auto-compile.el --- automatically compile Emacs Lisp libraries
-;; Version: 20131106.1531
+;; Version: 20140309.1316
 
-;; Copyright (C) 2008-2013  Jonas Bernoulli
+;; Copyright (C) 2008-2014  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20080830
-;; Status: beta
 ;; Package-Requires: ((cl-lib "0.2") (packed "0.3.4"))
 ;; Homepage: http://tarsius.github.com/auto-compile
 ;; Keywords: compile, convenience, lisp
-
-;; This is a beta release.  Version numbers are inspired by how
-;; Emacs is versioned - 1.1.0 will be the first stable version.
 
 ;; This file is not part of GNU Emacs.
 
@@ -75,19 +71,19 @@
 ;; Automatically compilation of Emacs Lisp source files is useful for
 ;; at least the following reasons:
 
-;; ◆ Emacs prefers the byte code file over the source file even if the
+;; - Emacs prefers the byte code file over the source file even if the
 ;;   former is outdated.  If you have to do the compilation manually
 ;;   you will at least occasionally forget to do so and end up with an
 ;;   old version of your code being loaded.
 
-;; ◆ There are many otherwise fine libraries to be found on the
+;; - There are many otherwise fine libraries to be found on the
 ;;   Internet which when compiled will confront the user with a wall
 ;;   of compile warnings and an occasional error.  If authors are
 ;;   informed about these (often trivial) problems after each save
 ;;   they will likely fix them quite quickly.  That or they have a
 ;;   high noise tolerance.
 
-;; ◆ It's often easier and less annoying to fix errors and warnings as
+;; - It's often easier and less annoying to fix errors and warnings as
 ;;   they are introduced than to do a "let's compile today's work and
 ;;   see how it goes".
 

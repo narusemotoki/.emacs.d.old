@@ -56,11 +56,16 @@
               ;; Remove it for the helm one. (Fixed in Emacs24)
               (remove-hook 'minibuffer-setup-hook 'eshell-mode)))
     (candidates . helm-esh-get-candidates)
+    (persistent-action . ignore)
     (filtered-candidate-transformer
      (lambda (candidates _sources)
        (cl-loop for i in (sort candidates 'helm-generic-sort-fn)
                 collect
-                (cons (abbreviate-file-name i) i))))
+                (cond ((string-match "\\`~/?" helm-ec-target)
+                       (abbreviate-file-name i))
+                      ((string-match "\\`/" helm-ec-target) i)
+                      (t
+                       (file-relative-name i))))))
     (action . helm-ec-insert))
   "Helm source for Eshell completion.")
 
