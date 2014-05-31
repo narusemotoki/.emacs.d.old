@@ -13,6 +13,8 @@
 (global-set-key (kbd "C-c C-l") 'helm-ls-git-ls)
 ; Gitでgrep
 (global-set-key (kbd "C-C C-g") 'helm-git-grep)
+; M-xを置き換える。これにしないとHistoryが上に出てこない
+(global-set-key (kbd "M-x") 'helm-M-x)
 
 ; 高速で反応させる
 (setq helm-idle-delay 0.1)
