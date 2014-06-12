@@ -22,6 +22,9 @@
 ; スクロールバーを非表示にする
 (toggle-scroll-bar nil)
 
+; スクロールバーを無効にする
+(scroll-bar-mode -1)
+
 ; 対応する括弧を光らせる。
 (show-paren-mode 1)
 
