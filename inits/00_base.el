@@ -129,3 +129,8 @@
 
 ; ESC連打でウィンドウがひとつになるのを防ぐ
 (global-set-key (kbd "M-ESC ESC") 'keyboard-quit)
+
+; フォントの設定
+; rictyはsetup.shでインストールできる
+; 1.5の倍数をセットする
+(add-to-list 'default-frame-alist '(font . "ricty-13.5"))
