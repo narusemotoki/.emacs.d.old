@@ -7,8 +7,8 @@
 (setq file-name-coding-system 'utf-8)
 (setq locale-coding-system 'utf-8)
 
-; 256MBまでGCしない
-(setq gc-cons-threshold 268435456)
+; 128MBまでGCしない
+(setq gc-cons-threshold 134217728)
 
 ; *GNU Emacs*バッファを作らない
 (setq inhibit-startup-screen t)
