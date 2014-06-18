@@ -54,11 +54,3 @@
 ;(push 'ac-source-look ac-sources)
 ; 任意のタイミングで起動
 (global-set-key (kbd "M-h") 'ac-complete-look)
-
-; 部分一致の補完機能を使う
-; p-bでprint-bufferとか
-(partial-completion-mode t)
-
-; 大文字小文字を区別する
-(custom-set-valiables
- '(ac-ignore-case nil))
