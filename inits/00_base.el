@@ -137,3 +137,7 @@
 ; rictyはsetup.shでインストールできる
 ; 1.5の倍数をセットする
 (add-to-list 'default-frame-alist '(font . "ricty-13.5"))
+
+; カーソル位置の記憶とそこへのジャンプ
+(define-key global-map (kbd "C-x p") `point-to-register)
+(define-key global-map (kbd "C-x j") `jump-to-register)
