@@ -313,6 +313,11 @@ Be sure to know what you are doing when modifying this."
   :group 'helm
   :type 'float)
 
+(defcustom helm-exit-idle-delay 0.3
+  "Be idle for this many seconds before exiting minibuffer and running action."
+  :group 'helm
+  :type 'float)
+
 (defcustom helm-full-frame nil
   "Use current window to show the candidates.
 If t then Helm doesn't pop up a new window."
@@ -756,6 +761,8 @@ when `helm' is keyboard-quitted.")
 (defvar helm--mode-line-display-prefarg nil)
 (defvar helm--temp-follow-flag nil
   "[INTERNAL] A simple flag to notify persistent action we are following.")
+(defvar helm--reading-passwd-or-string nil)
+(defvar helm--in-update nil)
 
 
 ;; Utility: logging
@@ -2217,7 +2224,6 @@ This can be useful for e.g writing quietly a complex regexp."
                "Helm update suspended!"
              "Helm update reenabled!")))
 
-(defvar helm--reading-passwd-or-string nil)
 (defadvice tramp-read-passwd (around disable-helm-update)
   ;; Suspend update when prompting for a tramp password.
   (setq helm-suspend-update-flag t)
@@ -2318,7 +2324,15 @@ If no map is found in current source do nothing (keep previous map)."
     (unless (helm-action-window)
       (setq helm-input helm-pattern))
     (helm-log-eval helm-pattern helm-input)
+    (setq helm--in-update t)
     (helm-update)))
+
+(defun helm--reset-update-flag ()
+  (run-with-idle-timer
+   helm-exit-idle-delay nil
+   (lambda () (setq helm--in-update nil))))
+
+(add-hook 'helm-after-update-hook #'helm--reset-update-flag)
 
 
 ;;; Core: source compiler
@@ -2919,25 +2933,25 @@ after the source name by overlay."
     (helm-output-filter--post-process)))
 
 (defun helm-output-filter--process-source (process output-string source limit)
-  (let ((count 0))
-    (cl-dolist (candidate (helm-transform-candidates
-                           (helm-output-filter--collect-candidates
-                            (split-string output-string "\n")
-                            (assoc 'incomplete-line source)
-                            source)
-                           source t))
-      (cl-incf count)
-      (when candidate   ; filter-one-by-one may return nil candidates.
-        (if (assq 'multiline source)
-            (let ((start (point)))
-              (helm-insert-candidate-separator)
-              (helm-insert-match candidate 'insert-before-markers source count)
-              (put-text-property start (point) 'helm-multiline t))
-            (helm-insert-match candidate 'insert-before-markers source count))
-        (cl-incf (cdr (assoc 'item-count source)))
-        (when (>= (assoc-default 'item-count source) limit)
-          (helm-kill-async-process process)
-          (cl-return))))))
+  (cl-dolist (candidate (helm-transform-candidates
+                         (helm-output-filter--collect-candidates
+                          (split-string output-string "\n")
+                          (assoc 'incomplete-line source)
+                          source)
+                         source t))
+    (when candidate     ; filter-one-by-one may return nil candidates.
+      (if (assq 'multiline source)
+          (let ((start (point)))
+            (helm-insert-candidate-separator)
+            (helm-insert-match candidate 'insert-before-markers source
+                               (1+ (cdr (assoc 'item-count source))))
+            (put-text-property start (point) 'helm-multiline t))
+          (helm-insert-match candidate 'insert-before-markers source
+                             (1+ (cdr (assoc 'item-count source)))))
+      (cl-incf (cdr (assoc 'item-count source)))
+      (when (>= (assoc-default 'item-count source) limit)
+        (helm-kill-async-process process)
+        (cl-return)))))
 
 (defun helm-output-filter--collect-candidates (lines incomplete-line-info source)
   "Collect LINES maybe completing the truncated first and last lines."
@@ -3474,13 +3488,18 @@ don't exit and send message 'no match'."
 
 (defun helm-read-string (prompt &optional initial-input history
                                   default-value inherit-input-method)
+  "Same as `read-string' but for reading string from a helm session."
   (let ((helm--reading-passwd-or-string t))
     (read-string
      prompt initial-input history default-value inherit-input-method)))
 
 (defun helm--updating-p ()
   ;; helm timer is between two cycles.
-  (not (equal (minibuffer-contents) helm-pattern)))
+  ;; IOW `helm-check-minibuffer-input' haven't yet compared input
+  ;; and `helm-pattern'.
+  (or (not (equal (minibuffer-contents) helm-pattern))
+      ;; `helm-check-minibuffer-input' have launched `helm-update'.
+      helm--in-update))
 
 (defun helm-maybe-exit-minibuffer ()
   (interactive)

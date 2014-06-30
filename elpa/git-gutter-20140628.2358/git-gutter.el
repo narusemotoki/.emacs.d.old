@@ -4,8 +4,8 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-git-gutter
-;; Version: 20140623.746
-;; X-Original-Version: 0.62
+;; Version: 20140628.2358
+;; X-Original-Version: 0.63
 ;; Package-Requires: ((cl-lib "0.5") (emacs "24"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -701,6 +701,10 @@ character for signs of changes"
       (setq git-gutter-mode t
             git-gutter:toggle-flag t))
     (force-mode-line-update)))
+
+;; for linum-user
+(when global-linum-mode
+  (git-gutter:linum-setup))
 
 (provide 'git-gutter)
 

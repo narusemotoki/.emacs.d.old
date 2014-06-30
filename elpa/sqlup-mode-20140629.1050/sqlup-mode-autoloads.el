@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads nil nil ("sqlup-mode-pkg.el" "sqlup-mode.el") (21422
-;;;;;;  20563 635947 830000))
+;;;### (autoloads nil nil ("sqlup-mode-pkg.el" "sqlup-mode.el") (21424
+;;;;;;  50452 10003 692000))
 
 ;;;***
 

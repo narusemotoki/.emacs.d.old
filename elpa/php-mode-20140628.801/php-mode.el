@@ -6,7 +6,7 @@
 
 ;;; Author: Eric James Michael Ritz
 ;;; URL: https://github.com/ejmr/php-mode
-;; Version: 20140627.901
+;; Version: 20140628.801
 ;;; X-Original-Version: 1.13.2
 
 (defconst php-mode-version-number "1.13.3"
@@ -445,9 +445,9 @@ working with Symfony2."
   (setq tab-width 4
         indent-tabs-mode nil)
   (c-set-style "psr2")
-  ;; Undo drupal coding style whitespace effects
-  (setq show-trailing-whitespace nil)
-  (remove-hook 'before-save-hook 'delete-trailing-whitespace t))
+  (set (make-local-variable 'require-final-newline) t)
+  (set (make-local-variable 'show-trailing-whitespace) t)
+  (add-hook 'before-save-hook 'delete-trailing-whitespace nil t))
 
 
 (defun php-mode-version ()
