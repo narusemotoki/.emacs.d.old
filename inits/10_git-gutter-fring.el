@@ -1,2 +1,2 @@
 ;(require 'git-gutter-fringe)
-;(global-git-gutter-mode t)
+(global-git-gutter-mode t)
