@@ -181,8 +181,7 @@ Any other keys pressed run their assigned command defined in MAP and exit the lo
     (define-key map (kbd "<RET>")      'helm-maybe-exit-minibuffer)
     (define-key map (kbd "C-i")        'helm-select-action)
     (define-key map (kbd "C-z")        'helm-execute-persistent-action)
-    (define-key map (kbd "C-e")        'helm-select-2nd-action-or-end-of-line)
-    (define-key map (kbd "C-j")        'helm-select-3rd-action)
+    (define-key map (kbd "C-j")        'helm-execute-persistent-action)
     (define-key map (kbd "C-o")        'helm-next-source)
     (define-key map (kbd "C-l")        'helm-recenter-top-bottom-other-window)
     (define-key map (kbd "M-C-l")      'helm-reposition-window-other-window)
@@ -252,6 +251,12 @@ Any other keys pressed run their assigned command defined in MAP and exit the lo
     (define-key map (kbd "C-h h")      'undefined)
     (cl-dolist (k (where-is-internal 'describe-mode global-map))
       (define-key map k 'helm-help))
+    ;; Bind all actions from 1 to 12 to their corresponding nth index+1.
+    (cl-loop for n from 0 to 12 do
+             (define-key map (kbd (format "<f%s>" (1+ n)))
+               `(lambda ()
+                  (interactive)
+                  (helm-select-nth-action ,n))))
     map)
   "Keymap for helm.")
 
@@ -313,7 +318,7 @@ Be sure to know what you are doing when modifying this."
   :group 'helm
   :type 'float)
 
-(defcustom helm-exit-idle-delay 0.3
+(defcustom helm-exit-idle-delay 0
   "Be idle for this many seconds before exiting minibuffer while helm is updating.
 Note that this does nothing when helm-buffer is up to date
 \(i.e exit without delay in this condition\)."
@@ -678,8 +683,7 @@ It is disabled by default because `helm-debug-buffer' grows quickly.")
 \\[helm-help]:Help \
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
   "Help string displayed in mode-line in `helm'.
 It can be a string or a list of two args, in this case,
 first arg is a string that will be used as name for candidates number,
@@ -1266,7 +1270,7 @@ with its properties."
           (helm-log-eval selection)
           selection)))))
 
-(defun helm-get-action ()
+(defun helm-get-actions-from-current-source ()
   "Return the associated action for the selected candidate.
 It is a function symbol \(sole action\) or list
 of \(action-display . function\)."
@@ -1444,7 +1448,7 @@ Return the result of last function call."
   "Return candidates number in `helm-buffer'.
 If IN-CURRENT-SOURCE is provided return number of candidates
 in the source where point is."
-  (with-current-buffer helm-buffer
+  (with-current-buffer (helm-buffer-get)
     (if (or (helm-empty-buffer-p)
             (helm-empty-source-p))
         0
@@ -3068,7 +3072,7 @@ If PRESERVE-SAVED-ACTION is non--nil save action."
                     helm-saved-action
                     (if (get-buffer helm-action-buffer)
                         (helm-get-selection helm-action-buffer)
-                      (helm-get-action)))))
+                      (helm-get-actions-from-current-source)))))
   (let ((source (or helm-saved-current-source
                     (helm-get-current-source)))
         non-essential)
@@ -3105,10 +3109,11 @@ If action buffer is selected, back to the helm buffer."
            (set-window-buffer (get-buffer-window helm-action-buffer)
                               helm-buffer)
            (kill-buffer helm-action-buffer)
+           (helm-display-mode-line (helm-get-current-source))
            (helm-set-pattern helm-input 'noupdate))
           (helm-saved-selection
            (setq helm-saved-current-source (helm-get-current-source))
-           (let ((actions (helm-get-action)))
+           (let ((actions (helm-get-actions-from-current-source)))
              (if (functionp actions)
                  (message "Sole action: %s" actions)
                (helm-show-action-buffer actions)
@@ -3128,11 +3133,18 @@ If action buffer is selected, back to the helm buffer."
             (volatile)
             (nomark)
             (candidates . ,actions)
+            (mode-line . ("Action(s)" "TAB:BackToCands RET/f1/f2/fn:NthAct"))
             (candidate-transformer
              . (lambda (candidates)
                  (cl-loop for (i . j) in candidates
-                       collect
-                       (cons (propertize i 'face 'helm-action) j))))
+                          for count from 1
+                          collect
+                          (cons (concat (cond ((> count 12)
+                                               "      ")
+                                              ((< count 10)
+                                               (format "[f%s]  " count))
+                                              (t (format "[f%s] " count)))
+                                        (propertize i 'face 'helm-action)) j))))
             (candidate-number-limit))))
     (set (make-local-variable 'helm-source-filter) nil)
     (set (make-local-variable 'helm-selection-overlay) nil)
@@ -4138,7 +4150,12 @@ Possible values are 'left 'right 'below or 'above."
   (setq helm-saved-selection (helm-get-selection))
   (unless helm-saved-selection
     (error "Nothing is selected"))
-  (setq helm-saved-action (helm-get-nth-action n (helm-get-action)))
+  (setq helm-saved-action
+        (helm-get-nth-action
+         n
+         (if (get-buffer-window helm-action-buffer 'visible)
+             (assoc-default 'candidates (helm-get-current-source))
+             (helm-get-actions-from-current-source))))
   (helm-maybe-exit-minibuffer))
 
 (defun helm-get-nth-action (n action)
@@ -4151,30 +4168,6 @@ Possible values are 'left 'right 'below or 'above."
          (error "Sole action"))
         (t
          (error "Error in `helm-select-nth-action'"))))
-
-(defun helm-select-2nd-action ()
-  "Select the 2nd action for the currently selected candidate."
-  (interactive)
-  (helm-select-nth-action 1))
-
-(defun helm-select-3rd-action ()
-  "Select the 3rd action for the currently selected candidate."
-  (interactive)
-  (helm-select-nth-action 2))
-
-(defun helm-select-4th-action ()
-  "Select the 4th action for the currently selected candidate."
-  (interactive)
-  (helm-select-nth-action 3))
-
-(defun helm-select-2nd-action-or-end-of-line ()
-  "Select the 2nd action for the currently selected candidate.
-This happen when point is at the end of minibuffer.
-Otherwise goto the end of minibuffer."
-  (interactive)
-  (if (eolp)
-      (helm-select-nth-action 1)
-    (end-of-line)))
 
 ;; Utility: Persistent Action
 (defmacro with-helm-display-same-window (&rest body)
@@ -4219,7 +4212,8 @@ and keep its visibility."
         (helm-log-eval (current-buffer))
         (let ((helm-in-persistent-action t))
           (with-helm-display-same-window
-            (helm-execute-selection-action-1 nil (or fn (helm-get-action)) t)
+            (helm-execute-selection-action-1
+             nil (or fn (helm-get-actions-from-current-source)) t)
             (helm-log-run-hook 'helm-after-persistent-action-hook))
           ;; A typical case is when a persistent action delete
           ;; the buffer already displayed in

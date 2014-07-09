@@ -7,7 +7,7 @@
 ;;;;;;  git-gutter:previous-hunk git-gutter:next-hunk git-gutter:popup-hunk
 ;;;;;;  git-gutter:stage-hunk git-gutter:revert-hunk global-git-gutter-mode
 ;;;;;;  git-gutter-mode git-gutter:linum-setup) "git-gutter" "git-gutter.el"
-;;;;;;  (21434 8932 304935 577000))
+;;;;;;  (21436 48391 296964 646000))
 ;;; Generated autoloads from git-gutter.el
 
 (autoload 'git-gutter:linum-setup "git-gutter" "\
@@ -83,8 +83,8 @@ Toggle to show diff information.
 
 ;;;***
 
-;;;### (autoloads nil nil ("git-gutter-pkg.el") (21434 8932 343227
-;;;;;;  735000))
+;;;### (autoloads nil nil ("git-gutter-pkg.el") (21436 48391 327878
+;;;;;;  393000))
 
 ;;;***
 

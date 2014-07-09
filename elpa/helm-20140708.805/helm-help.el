@@ -56,11 +56,11 @@ Tab, C-i : Show action list
 Left : Previous Source
 Right, C-o : Next Source
 C-k : Delete pattern
-C-z : Persistent Action (Execute action with helm session kept)
+C-j or C-z: Persistent Action (Execute action with helm session kept)
 
-== Shortcuts For 2nd/3rd Action ==
-\\[helm-select-2nd-action-or-end-of-line] : Execute 2nd Action (if the minibuffer cursor is at end of line)
-\\[helm-select-3rd-action] : Execute 3rd Action
+== Shortcuts For nth Action ==
+
+C-1/9: Execute nth 1 to 9 Action.
 
 == Visible Marks ==
 Visible marks store candidate. Some actions uses marked candidates.
@@ -205,7 +205,7 @@ This list is customizable, see `helm-buffers-favorite-modes'.
 You have a command to kill buffer(s) and quit emacs and a command to kill buffers one by one
 \(no marked\) without quitting helm.
 You can run this persistent kill buffer command either with the regular
-`helm-execute-persistent-action' called with a prefix arg (C-u C-z) or with its specific command
+`helm-execute-persistent-action' called with a prefix arg (C-u C-j) or with its specific command
 `helm-buffer-run-kill-persistent' see binding below.
 
 - Meaning of colors and prefixes for buffers:
@@ -269,12 +269,12 @@ Italic     => A non--file buffer.
     e.g \"fob\" or \"fbr\" will complete \"foobar\"
     but \"fb\" will wait for a third char for completing.
 
-- Use `C-u C-z' to watch an image.
+- Use `C-u C-j' to watch an image.
 
-- `C-z' on a filename will expand in helm-buffer to this filename.
-  Second hit on `C-z' will display buffer filename.
-  Third hit on `C-z' will kill buffer filename.
-  NOTE: `C-u C-z' will display buffer directly.
+- `C-j' on a filename will expand in helm-buffer to this filename.
+  Second hit on `C-j' will display buffer filename.
+  Third hit on `C-j' will kill buffer filename.
+  NOTE: `C-u C-j' will display buffer directly.
 
 - To browse images directories turn on `helm-follow-mode' and navigate with arrow keys.
   You can also use `helm-follow-action-forward' and `helm-follow-action-backward'
@@ -375,12 +375,12 @@ Persistent actions:
 
 By default `helm-read-file-name' use the persistent actions of `helm-find-files'.
 
-- Use `C-u C-z' to watch an image.
+- Use `C-u C-j' to watch an image.
 
-- `C-z' on a filename will expand in helm-buffer to this filename.
-  Second hit on `C-z' will display buffer filename.
-  Third hit on `C-z' will kill buffer filename.
-  NOTE: `C-u C-z' will display buffer directly.
+- `C-j' on a filename will expand in helm-buffer to this filename.
+  Second hit on `C-j' will display buffer filename.
+  Third hit on `C-j' will kill buffer filename.
+  NOTE: `C-u C-j' will display buffer directly.
 
 - To browse images directories turn on `helm-follow-mode' and navigate with arrow keys.
 
@@ -475,7 +475,7 @@ You can save your results in a grep-mode buffer, see below.
 \\[helm-yank-text-at-point]\t\t->Yank Text at point in minibuffer.
 \\[helm-grep-run-other-window-action]\t\t->Jump other window.
 \\[helm-grep-run-other-frame-action]\t\t->Jump other frame.
-\\[helm-grep-run-persistent-action]\t\t->Run persistent action (Same as `C-z').
+\\[helm-grep-run-persistent-action]\t\t->Run persistent action (Same as `C-j').
 \\[helm-grep-run-default-action]\t\t->Run default action (Same as RET).
 \\[helm-grep-run-save-buffer]\t\t->Save to a `grep-mode' enabled buffer.
 \\[helm-grep-help]\t\t->Show this help.
@@ -748,7 +748,7 @@ the command is called once for each file like this:
   "== Helm M-x ==\
 \nHelm M-x tips:
 
-You can get help on any command with persistent action (C-z).
+You can get help on any command with persistent action (C-j).
 
 All the prefix args passed BEFORE running `helm-M-x' are ignored.
 When you want to pass prefix args, pass them AFTER starting `helm-M-x',
@@ -838,8 +838,7 @@ the amount of prefix args entered.
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
     "String displayed in mode-line in `helm-source-buffers-list'"))
 
 ;;;###autoload
@@ -859,8 +858,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
     "String displayed in mode-line in `helm-source-buffers-list'"))
 
 ;;;###autoload
@@ -870,8 +868,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
   "String displayed in mode-line in `helm-source-find-files'")
 
 ;;;###autoload
@@ -882,8 +879,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
   "String displayed in mode-line in `helm-source-find-files'.")
 
 ;;;###autoload
@@ -893,8 +889,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in Locate.")
 
@@ -905,8 +900,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in `helm-do-grep'.")
 
@@ -917,8 +911,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend"
   "String displayed in mode-line in `helm-do-pdfgrep'.")
 
@@ -929,8 +922,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
   "String displayed in mode-line in `helm-etags-select'.")
 
 ;;;###autoload
@@ -940,8 +932,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct"
+f1/f2/f-n:NthAct"
   "String displayed in mode-line in `helm-ucs'.")
 
 ;;;###autoload
@@ -952,8 +943,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct")
+f1/f2/f-n:NthAct")
   "String displayed in mode-line in `helm-source-buffers-list'")
 
 ;;;###autoload
@@ -965,8 +955,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -976,8 +965,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -988,8 +976,7 @@ with shift: Kill"))
 \\[helm-help]:Help \
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct")
+f1/f2/f-n:NthAct")
 
 ;;;###autoload
 (defvar helm-top-mode-line "\
@@ -998,8 +985,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1009,8 +995,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1020,8 +1005,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1031,8 +1015,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1042,8 +1025,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 ;;;###autoload
@@ -1053,8 +1035,7 @@ with shift: Kill"))
 \\<helm-map>\
 \\[helm-select-action]:Act \
 \\[helm-maybe-exit-minibuffer]/\
-\\[helm-select-2nd-action-or-end-of-line]/\
-\\[helm-select-3rd-action]:NthAct \
+f1/f2/f-n:NthAct \
 \\[helm-toggle-suspend-update]:Tog.suspend")
 
 

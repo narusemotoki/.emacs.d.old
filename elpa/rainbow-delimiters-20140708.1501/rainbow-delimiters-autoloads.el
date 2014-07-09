@@ -5,7 +5,7 @@
 
 ;;;### (autoloads (global-rainbow-delimiters-mode rainbow-delimiters-mode-disable
 ;;;;;;  rainbow-delimiters-mode-enable rainbow-delimiters-mode) "rainbow-delimiters"
-;;;;;;  "rainbow-delimiters.el" (21306 24287 530021 476000))
+;;;;;;  "rainbow-delimiters.el" (21436 48312 656896 716000))
 ;;; Generated autoloads from rainbow-delimiters.el
 
 (autoload 'rainbow-delimiters-mode "rainbow-delimiters" "\
@@ -14,12 +14,12 @@ Highlight nested parentheses, brackets, and braces according to their depth.
 \(fn &optional ARG)" t nil)
 
 (autoload 'rainbow-delimiters-mode-enable "rainbow-delimiters" "\
-
+Enable `rainbow-delimiters-mode'.
 
 \(fn)" nil nil)
 
 (autoload 'rainbow-delimiters-mode-disable "rainbow-delimiters" "\
-
+Disable `rainbow-delimiters-mode'.
 
 \(fn)" nil nil)
 
@@ -46,8 +46,8 @@ See `rainbow-delimiters-mode' for more information on Rainbow-Delimiters mode.
 
 ;;;***
 
-;;;### (autoloads nil nil ("rainbow-delimiters-pkg.el") (21306 24287
-;;;;;;  569318 54000))
+;;;### (autoloads nil nil ("rainbow-delimiters-pkg.el") (21436 48312
+;;;;;;  697644 715000))
 
 ;;;***
 
