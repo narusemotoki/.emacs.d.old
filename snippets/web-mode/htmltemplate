@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+# contributor: Naruse Motoki<motoki@naru.se>
+# --
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>${1:Title}</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body>
+    $0
+  </body>
+</html>

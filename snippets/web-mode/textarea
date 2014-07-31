@@ -1,0 +1,4 @@
+# -*- coding: utf-8 -*-
+# contributor: Naruse Motoki<motoki@naru.se>
+# --
+<textarea name="${1:Name}"></textarea>

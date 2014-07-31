@@ -1,0 +1,6 @@
+# -*- coding: utf-8 -*-
+# contributor: Naruse Motoki<motoki@naru.se>
+# --
+<form method="${1:post}" action="$2">
+  $0
+</form>
