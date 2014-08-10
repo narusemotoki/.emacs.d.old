@@ -141,3 +141,10 @@
 ; カーソル位置の記憶とそこへのジャンプ
 (define-key global-map (kbd "C-x p") `point-to-register)
 (define-key global-map (kbd "C-x j") `jump-to-register)
+
+(add-hook 'after-init-hook 'my-after-init-hook)
+(defun my-after-init-hook ()
+(let ((envs '("PATH" "GOROOT" "GOPATH")))
+  (exec-path-from-shell-copy-envs envs))
+  )
+
