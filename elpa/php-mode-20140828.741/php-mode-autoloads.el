@@ -4,7 +4,7 @@
 
 
 ;;;### (autoloads (php-mode php-extra-constants php) "php-mode" "php-mode.el"
-;;;;;;  (21499 18287 359809 581000))
+;;;;;;  (21505 21532 186988 465000))
 ;;; Generated autoloads from php-mode.el
 
 (let ((loads (get 'php 'custom-loads))) (if (member '"php-mode" loads) nil (put 'php 'custom-loads (cons '"php-mode" loads))))
@@ -27,8 +27,8 @@ Major mode for editing PHP code.
 
 ;;;***
 
-;;;### (autoloads nil nil ("php-mode-pkg.el") (21499 18287 400318
-;;;;;;  758000))
+;;;### (autoloads nil nil ("php-mode-pkg.el") (21505 21532 231064
+;;;;;;  626000))
 
 ;;;***
 

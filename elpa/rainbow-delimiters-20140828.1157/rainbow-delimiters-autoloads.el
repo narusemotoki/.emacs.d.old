@@ -5,7 +5,7 @@
 
 ;;;### (autoloads (global-rainbow-delimiters-mode rainbow-delimiters-mode-disable
 ;;;;;;  rainbow-delimiters-mode-enable rainbow-delimiters-mode) "rainbow-delimiters"
-;;;;;;  "rainbow-delimiters.el" (21503 10346 738610 326000))
+;;;;;;  "rainbow-delimiters.el" (21505 21531 150988 453000))
 ;;; Generated autoloads from rainbow-delimiters.el
 
 (autoload 'rainbow-delimiters-mode "rainbow-delimiters" "\
@@ -39,15 +39,15 @@ otherwise, disable it.  If called from Lisp, enable the mode if
 ARG is omitted or nil.
 
 Rainbow-Delimiters mode is enabled in all buffers where
-`rainbow-delimiters-mode-enable' would do it.
+`rainbow-delimiters-mode-enable-maybe' would do it.
 See `rainbow-delimiters-mode' for more information on Rainbow-Delimiters mode.
 
 \(fn &optional ARG)" t nil)
 
 ;;;***
 
-;;;### (autoloads nil nil ("rainbow-delimiters-pkg.el") (21503 10346
-;;;;;;  798431 171000))
+;;;### (autoloads nil nil ("rainbow-delimiters-pkg.el") (21505 21531
+;;;;;;  186047 216000))
 
 ;;;***
 

@@ -2,7 +2,7 @@
 
 ;; Author: IMAKADO <ken.imakado@gmail.com>
 ;; URL: https://github.com/emacs-jp/init-loader/
-;; Version: 20140709.20
+;; Version: 20140828.1806
 ;; X-Original-Version: 0.01
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -180,7 +180,7 @@ example, 00_foo.el, 01_bar.el ... 99_keybinds.el."
 
     (case init-loader-show-log-after-init
       (error-only (add-hook 'after-init-hook 'init-loader--show-log-error-only))
-      (t (add-hook 'after-init-hook 'init-loader-show-log)))))
+      ('t (add-hook 'after-init-hook 'init-loader-show-log)))))
 
 (defun init-loader-follow-symlink (dir)
   (cond ((file-symlink-p dir)

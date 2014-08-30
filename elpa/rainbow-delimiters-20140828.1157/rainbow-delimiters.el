@@ -4,7 +4,7 @@
 ;; Author: Jeremy Rayman <opensource@jeremyrayman.com>
 ;; Maintainer: Jeremy Rayman <opensource@jeremyrayman.com>
 ;; Created: 2010-09-02
-;; Version: 20140827.1040
+;; Version: 20140828.1157
 ;; X-Original-Version: 1.3.7
 ;; Keywords: faces, convenience, lisp, matching, tools, rainbow, rainbow parentheses, rainbow parens
 ;; EmacsWiki: http://www.emacswiki.org/emacs/RainbowDelimiters
@@ -111,6 +111,16 @@
   :link '(url-link :tag "Website for rainbow-delimiters (EmacsWiki)"
                    "http://www.emacswiki.org/emacs/RainbowDelimiters")
   :group 'applications)
+
+(defcustom rainbow-delimiters-ignore-modes
+  '(special-mode eshell-mode cider-repl-mode)
+  "List of modes in which `rainbow-delimiters-mode' should not be automatically enabled.
+
+If the mode of a buffer is derived from one of these modes, then
+`global-rainbow-delimiters-mode' will not enable `rainbow-delimiters-mode' in that buffer."
+  :tag "Ignore in this modes"
+  :type '(list symbol)
+  :group 'rainbow-delimiters)
 
 (defgroup rainbow-delimiters-faces nil
   "Faces for successively nested pairs of delimiters.
@@ -533,9 +543,10 @@ Used by font-lock for dynamic highlighting."
   (if rainbow-delimiters-mode
       (rainbow-delimiters-mode-turn-on)
     (rainbow-delimiters-mode-turn-off))
-  (if (fboundp 'font-lock-flush)
-      (font-lock-flush)
-    (font-lock-fontify-buffer)))
+  (when font-lock-mode
+    (if (fboundp 'font-lock-flush)
+        (font-lock-flush)
+      (font-lock-fontify-buffer))))
 
 ;;;###autoload
 (defun rainbow-delimiters-mode-enable ()
@@ -549,7 +560,13 @@ Used by font-lock for dynamic highlighting."
 
 ;;;###autoload
 (define-globalized-minor-mode global-rainbow-delimiters-mode
-  rainbow-delimiters-mode rainbow-delimiters-mode-enable)
+  rainbow-delimiters-mode rainbow-delimiters-mode-enable-maybe)
+
+(defun rainbow-delimiters-mode-enable-maybe ()
+  "Enable `rainbow-delimiters-mode' if appropriate in this buffer."
+  (unless (apply 'derived-mode-p rainbow-delimiters-ignore-modes)
+    (rainbow-delimiters-mode-enable)))
+
 
 (provide 'rainbow-delimiters)
 ;;; rainbow-delimiters.el ends here
