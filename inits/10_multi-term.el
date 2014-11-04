@@ -6,15 +6,30 @@
 
 (global-set-key (kbd "C-c C-t") 'multi-term)
 
+; byobuのためにC-z C-zでC-zを送る
+(defun term-send-c-z ()
+  (interactive)
+  (term-send-raw-string "\C-z"))
+
 ; multi-termでは行末のスペースを強調しない
 ; yasnipetを無効にする
 (add-hook
   'term-mode-hook
   '(lambda()
-    (setq show-trailing-whitespace nil)
-    (setq yas-minor-mode nil)
+     (setq show-trailing-whitespace nil)
+     (setq yas-minor-mode nil)
+     ; elscreend以外でもC-zを使えるようにする
+     (define-key term-raw-map "\C-z" (lookup-key (current-global-map) "\C-z"))
+     (define-key term-raw-map (kbd "C-z C-z") 'term-send-c-z)
+     (define-key term-raw-map (kbd "C-\\") 'other-window)
+     (define-key term-raw-map (kbd "C-y") 'term-paste)
+     (define-key term-raw-map (kbd "C-h") 'term-send-backspace)
+     (define-key term-raw-map (kbd "M-d") 'term-send-forward-kill-word)
+     (define-key term-raw-map (kbd "M-<backspace>") 'term-send-backward-kill-word)
+     (define-key term-raw-map (kbd "M-DEL") 'term-send-backward-kill-word)
+     (define-key term-raw-map (kbd "ESC ESC") 'term-send-raw)
+     )
   )
-)
 
 ; global-linum-modeを特定のmodeでのみ無効にする
 ; http://stackoverflow.com/questions/3875213/turning-on-linum-mode-when-in-python-c-mode
