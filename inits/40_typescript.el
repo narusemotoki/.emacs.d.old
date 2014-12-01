@@ -29,19 +29,19 @@
 ;; (customize-group "tss")
 
 ;; Do setting recommemded configuration
-;(tss-config-default)
+(tss-config-default)
 
-(defun my-tss-config ()
-  "Do setting recommemded configuration."
-  ;; Activate auto-complete and setup TSS automatically when open tss-enable-modes buffer.
-  (loop for mode in tss-enable-modes
-        for hook = (intern-soft (concat (symbol-name mode) "-hook"))
-        do (add-to-list 'ac-modes mode)
-        ;if (and hook
-        ;        (symbolp hook))
-        do (add-hook hook 'tss-setup-current-buffer t))
-  ;; Run flymake when save buffer.
-  (add-hook 'after-save-hook 'tss-run-flymake t)
-  ;; Delete tss process of the buffer when kill buffer.
-  (add-hook 'kill-buffer-hook 'tss--delete-process t))
-(my-tss-config)
+;(defun my-tss-config ()
+;  "Do setting recommemded configuration."
+;  ;; Activate auto-complete and setup TSS automatically when open tss-enable-modes buffer.
+;  (loop for mode in tss-enable-modes
+;        for hook = (intern-soft (concat (symbol-name mode) "-hook"))
+;        do (add-to-list 'ac-modes mode)
+;        ;if (and hook
+;        ;        (symbolp hook))
+;        do (add-hook hook 'tss-setup-current-buffer t))
+;  ;; Run flymake when save buffer.
+;  (add-hook 'after-save-hook 'tss-run-flymake t)
+;  ;; Delete tss process of the buffer when kill buffer.
+;  (add-hook 'kill-buffer-hook 'tss--delete-process t))
+;(my-tss-config)

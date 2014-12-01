@@ -1,3 +1,0 @@
-BASE=../typescript/
-
-all:
