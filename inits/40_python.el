@@ -1,5 +1,6 @@
 ; flymake
 (require 'flymake-python-pyflakes)
+(setq flymake-python-pyflakes-executable "pyflakes3")
 (add-hook 'python-mode-hook 'flymake-python-pyflakes-load)
 
 ; http://qiita.com/yuu116atlab/items/2a62cb880ac863dcc8ef
