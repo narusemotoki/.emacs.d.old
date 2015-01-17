@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+# contributor: Naruse Motoki<motoki@naru.se>
+# --
+title
+#####
+
+:date: $0
+:slug: $1
+:category: $2
+:tags: $3
+:Status: draft
+
+$0
