@@ -536,6 +536,20 @@ support the -b flag for compatibility with locate when they are used with it.
 When your directory is not under version control,
 don't forget to refresh your cache when files have been added/removed in your directory.
 
+*** Find command
+
+Recursively search files using \"find\" shell command.
+
+Candidates are all filenames that match all given globbing patterns.
+This respects the options `helm-case-fold-search' and
+`helm-findutils-search-full-path'.
+
+You can pass arbitrary options directly to find after a \"*\" separator.
+For example, this would find all files matching \"book\" that are larger
+than 1 megabyte:
+
+book * -size +1M
+
 \n** Specific commands for helm locate and others files sources:
 
 \\<helm-generic-files-map>
@@ -849,6 +863,14 @@ the upgrade action (visible only when there is upgradables packages).
 Of course you can upgrade a single package by just running the upgrade action
 without marking it.
 
+*** Meaning of flags prefixing packages (Emacs-25)
+
+- The flag \"S\" that prefix package names mean that this package is one of `package-selected-packages'.
+This feature is only available with emacs-25.
+
+- The flag \"U\" that prefix package names mean that this package is no more needed.
+This feature is only available with emacs-25.
+
 \n** Specific commands for Helm elisp package:\n
 \\<helm-el-package-map>
 \\[helm-el-package-show-all]\t->Show all packages.
@@ -948,6 +970,33 @@ the amount of prefix args entered.
 (defun helm-semantic-help ()
   (interactive)
   (let ((helm-help-message helm-semantic-help-message))
+    (helm-help)))
+
+;;; helm kmacro
+;;
+;;
+(defvar helm-kmacro-help-message
+  "\n* Helm kmacro\n
+\n** Helm kmacro tips:
+- Start recording some keys with `f3'
+- Record new kmacro with `f4'
+- Start `helm-execute-kmacro' to list all your macros.
+
+Use persistent action to run your kmacro as many time as needed,
+you can change of kmacro with `helm-next-line' `helm-previous-line'.
+
+NOTE: You can't record keys running helm commands.
+
+\n** Specific commands for Helm kmacro:\n
+\\<helm-kmacro-map>
+\\[helm-kmacro-help]\t->Show this help.
+\n** Helm Map\n
+\\{helm-map}")
+
+;;;###autoload
+(defun helm-kmacro-help ()
+  (interactive)
+  (let ((helm-help-message helm-kmacro-help-message))
     (helm-help)))
 
 

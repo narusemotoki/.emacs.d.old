@@ -400,8 +400,11 @@ from its directory."
    (let* ((sel       (helm-get-selection))
           (grep-line (and (stringp sel)
                           (helm-grep-split-line sel)))
-          (bmk-name  (replace-regexp-in-string "\\`\\*" "" sel))
-          (bmk       (assoc bmk-name bookmark-alist)))
+          (bmk-name  (and (stringp sel)
+                          (replace-regexp-in-string "\\`\\*" "" sel)))
+          (bmk       (and bmk-name (assoc bmk-name bookmark-alist)))
+          (default-preselection (or (buffer-file-name helm-current-buffer)
+                                    default-directory)))
      (if (stringp sel)
          (helm-aif (get-buffer (or (get-text-property
                                     (1- (length sel)) 'buffer-name sel)
@@ -424,8 +427,8 @@ from its directory."
                  ((and grep-line (file-exists-p (car grep-line)))
                   (expand-file-name (car grep-line)))
                  ((and ffap-url-regexp (string-match ffap-url-regexp sel)) sel)
-                 (t default-directory)))
-       default-directory))))
+                 (t default-preselection)))
+       default-preselection))))
 
 ;; Same as `vc-directory-exclusion-list'.
 (defvar helm-walk-ignore-directories
@@ -813,14 +816,21 @@ directory, open this directory."
     (helm-highlight-current-line)))
 
 (defun helm-find-file-as-root (candidate)
-  (let ((buf (helm-basename candidate))
-        non-essential)
+  (let* ((buf (helm-basename candidate))
+         (host (file-remote-p candidate 'host))
+         (remote-path (format "/%s:%s:%s"
+                              helm-su-or-sudo
+                              (or host "")
+                              (expand-file-name
+                               (if host
+                                   (file-remote-p candidate 'localname)
+                                 candidate))))
+         non-essential)
     (if (buffer-live-p (get-buffer buf))
         (progn
           (set-buffer buf)
-          (find-alternate-file (concat "/" helm-su-or-sudo
-                                       "::" (expand-file-name candidate))))
-      (find-file (concat "/" helm-su-or-sudo "::" (expand-file-name candidate))))))
+          (find-alternate-file remote-path))
+      (find-file remote-path))))
 
 (defun helm-find-many-files (_ignore)
   (let ((helm--reading-passwd-or-string t))
