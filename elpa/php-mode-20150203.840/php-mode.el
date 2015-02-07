@@ -6,13 +6,13 @@
 
 ;;; Author: Eric James Michael Ritz
 ;;; URL: https://github.com/ejmr/php-mode
-;; Version: 20150107.1517
-;;; X-Original-Version: 1.15.1
+;; Version: 20150203.840
+;;; X-Original-Version: 1.15.3
 
-(defconst php-mode-version-number "1.15.1"
+(defconst php-mode-version-number "1.15.3"
   "PHP Mode version number.")
 
-(defconst php-mode-modified "2015-01-06"
+(defconst php-mode-modified "2015-01-31"
   "PHP Mode build date.")
 
 ;;; License
@@ -170,6 +170,11 @@ of constants when set."
     (font-lock-add-keywords
      'php-mode `((,(php-mode-extra-constants-create-regexp value) 1 font-lock-constant-face))))
   (set sym value))
+
+(defcustom php-lineup-cascaded-calls nil
+  "Indent chained method calls to the previous line"
+  :type 'boolean
+  :group 'php)
 
 ;;;###autoload
 (defcustom php-extra-constants '()
@@ -542,15 +547,24 @@ PHP does not have an \"enum\"-like keyword."
     "isset"
     "list"
     "or"
+    "parent"
     "static"
     "unset"
     "var"
     "xor"
     "yield"
 
-    ;; technically not reserved keywords, but "declare directives"
+    ;; Below keywords are technically not reserved keywords, but
+    ;; threated no differently by php-mode from actual reserved
+    ;; keywords
+    ;;
+    ;;; declare directives:
     "encoding"
-    "ticks"))
+    "ticks"
+
+    ;;; self for static references:
+    "self"
+    ))
 
 ;; PHP does not have <> templates/generics
 (c-lang-defconst c-recognize-<>-arglists
@@ -575,13 +589,19 @@ might be to handle switch and goto labels differently."
                                (c-lang-const c-constant-kwds))
                        :test 'string-equal))))
 
+(defun php-lineup-cascaded-calls (langelem)
+  "Line up chained methods using `c-lineup-cascaded-calls',
+but only if the setting is enabled"
+  (if php-lineup-cascaded-calls
+    (c-lineup-cascaded-calls langelem)))
+
 (c-add-style
  "php"
  '((c-basic-offset . 4)
    (c-doc-comment-style . javadoc)
    (c-offsets-alist . ((arglist-close . php-lineup-arglist-close)
-                       (arglist-cont . (first c-lineup-cascaded-calls 0))
-                       (arglist-cont-nonempty . (first c-lineup-cascaded-calls c-lineup-arglist))
+                       (arglist-cont . (first php-lineup-cascaded-calls 0))
+                       (arglist-cont-nonempty . (first php-lineup-cascaded-calls c-lineup-arglist))
                        (arglist-intro . php-lineup-arglist-intro)
                        (case-label . +)
                        (class-open . -)
@@ -589,9 +609,9 @@ might be to handle switch and goto labels differently."
                        (inlambda . 0)
                        (inline-open . 0)
                        (label . +)
-                       (statement-cont . (first c-lineup-cascaded-calls +))
+                       (statement-cont . (first php-lineup-cascaded-calls php-lineup-string-cont +))
                        (substatement-open . 0)
-                       (topmost-intro-cont . (first c-lineup-cascaded-calls +))))))
+                       (topmost-intro-cont . (first php-lineup-cascaded-calls +))))))
 
 (defun php-enable-default-coding-style ()
   "Set PHP Mode to use reasonable default formatting."
@@ -613,8 +633,8 @@ code and modules."
   (c-set-style "pear")
 
   ;; Undo drupal/PSR-2 coding style whitespace effects
-  (set (make-local-variable 'show-trailing-whitespace) nil)
-  (remove-hook 'before-save-hook 'delete-trailing-whitespace))
+  (set (make-local-variable 'show-trailing-whitespace)
+       (default-value 'show-trailing-whitespace)))
 
 (c-add-style
  "drupal"
@@ -629,7 +649,7 @@ working with Drupal."
         indent-tabs-mode nil
         fill-column 78)
   (set (make-local-variable 'show-trailing-whitespace) t)
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  (add-hook 'before-save-hook 'delete-trailing-whitespace nil t)
   (c-set-style "drupal"))
 
 (c-add-style
@@ -648,8 +668,8 @@ working with Wordpress."
   (c-set-style "wordpress")
 
   ;; Undo drupal/PSR-2 coding style whitespace effects
-  (set (make-local-variable 'show-trailing-whitespace) nil)
-  (remove-hook 'before-save-hook 'delete-trailing-whitespace))
+  (set (make-local-variable 'show-trailing-whitespace)
+       (default-value 'show-trailing-whitespace)))
 
 (c-add-style
   "symfony2"
@@ -667,8 +687,8 @@ working with Symfony2."
   (c-set-style "symfony2")
 
   ;; Undo drupal/PSR-2 coding style whitespace effects
-  (set (make-local-variable 'show-trailing-whitespace) nil)
-  (remove-hook 'before-save-hook 'delete-trailing-whitespace))
+  (set (make-local-variable 'show-trailing-whitespace)
+       (default-value 'show-trailing-whitespace)))
 
 (c-add-style
   "psr2"
@@ -686,7 +706,7 @@ working with Symfony2."
   ;; Apply drupal-like coding style whitespace effects
   (set (make-local-variable 'require-final-newline) t)
   (set (make-local-variable 'show-trailing-whitespace) t)
-  (add-hook 'before-save-hook 'delete-trailing-whitespace))
+  (add-hook 'before-save-hook 'delete-trailing-whitespace nil t))
 
 (defconst php-beginning-of-defun-regexp
   "^\\s-*\\(?:\\(?:abstract\\|final\\|private\\|protected\\|public\\|static\\)\\s-+\\)*function\\s-+&?\\(\\(?:\\sw\\|\\s_\\)+\\)\\s-*("
@@ -850,6 +870,18 @@ This is was done due to the problem reported here:
 (defun php-c-vsemi-status-unknown-p ()
   "See `php-c-at-vsemi-p'."
   )
+
+(defun php-lineup-string-cont (langelem)
+  "Line up string toward equal sign or dot
+e.g.
+$str = 'some'
+     . 'string';
+this ^ lineup"
+  (save-excursion
+    (goto-char (cdr langelem))
+    (when (or (search-forward "=" (line-end-position) t)
+              (search-forward "." (line-end-position) t))
+      (vector (1- (current-column))))))
 
 (defun php-lineup-arglist-intro (langelem)
   (save-excursion
@@ -1313,6 +1345,9 @@ a completion list."
      ;; Highlight variables, e.g. 'var' in '$var' and '$obj->var', but
      ;; not in $obj->var()
      ("->\\(\\sw+\\)\\s-*(" 1 'default)
+
+     ;; Highlight special variables
+     ("\\$\\(this\\|that\\)" 1 font-lock-constant-face)
      ("\\(\\$\\|->\\)\\([a-zA-Z0-9_]+\\)" 2 font-lock-variable-name-face)
 
      ;; Highlight function/method names
@@ -1339,6 +1374,12 @@ a completion list."
    ;;   already fontified by another pattern. Note that using OVERRIDE
    ;;   is usually overkill.
    `(
+     ;; Highlight variables, e.g. 'var' in '$var' and '$obj->var', but
+     ;; not in $obj->var()
+     ("->\\(\\sw+\\)\\s-*(" 1 'default)
+
+     ("\\(\\$\\|->\\)\\([a-zA-Z0-9_]+\\)" 2 font-lock-variable-name-face)
+
      ;; Highlight all upper-cased symbols as constant
      ("\\<\\([A-Z_][A-Z0-9_]+\\)\\>" 1 font-lock-constant-face)
 
@@ -1413,7 +1454,7 @@ The output will appear in the buffer *PHP*."
       (call-process "php" nil php-buffer nil "-r" (clean-php-code code)))))
 
 
-(defface php-annotations-annotation-face '((t . (:inherit 'font-lock-constant-face)))
+(defface php-annotations-annotation-face '((t . (:inherit font-lock-constant-face)))
   "Face used to highlight annotations.")
 
 (defconst php-annotations-re "\\(\\s-\\|{\\)\\(@[[:alpha:]]+\\)")

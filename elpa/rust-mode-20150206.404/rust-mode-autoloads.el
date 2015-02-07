@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads (rust-mode) "rust-mode" "rust-mode.el" (21690 26760
-;;;;;;  314809 591000))
+;;;### (autoloads (rust-mode) "rust-mode" "rust-mode.el" (21717 41286
+;;;;;;  287769 704000))
 ;;; Generated autoloads from rust-mode.el
 
 (autoload 'rust-mode "rust-mode" "\
@@ -16,8 +16,8 @@ Major mode for Rust code.
 
 ;;;***
 
-;;;### (autoloads nil nil ("rust-mode-pkg.el") (21690 26760 338797
-;;;;;;  998000))
+;;;### (autoloads nil nil ("rust-mode-pkg.el") (21717 41286 327066
+;;;;;;  642000))
 
 ;;;***
 
