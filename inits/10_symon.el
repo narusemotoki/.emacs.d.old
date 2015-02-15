@@ -1,0 +1,2 @@
+(require 'symon)
+(symon-mode)
